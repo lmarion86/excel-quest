@@ -60,7 +60,7 @@ st.markdown("""
     <h3 style="color: #e8f0ec; font-weight: 300;">El Dominio de la Hoja de Cálculo</h3>
     <p style="margin-top: 20px; font-size: 1.2em; color: #5a7d6c;">Aprende Excel de forma gamificada, domina fórmulas, atajos y conviértete en un experto.</p>
     <br>
-    <a href="http://localhost:8000/Excel.html" target="_blank" class="btn-play">▶ Iniciar Aventura (Requiere servidor local)</a>
+    <a href="https://lmarion86.github.io/excel-quest/Excel.html" target="_blank" class="btn-play">▶ Iniciar Aventura</a>
 </div>
 """, unsafe_allow_html=True)
 
