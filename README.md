@@ -33,8 +33,8 @@ El desarrollo del proyecto se ha apoyado en modelos de lenguaje de Inteligencia 
 ## Enlace al prototipo publicado
 *[Aún no publicado - Pendiente de despliegue en Streamlit Community Cloud o GitHub Pages]*
 
-## Integrante
-- l_mar
+## Integrantes
+- Rodolfo Colomo, Roberto Carlos Mamani, Lucia Gonzales, Nelson Condori, Abad Bustamante
 
 ## Consideraciones Éticas
 El proyecto fue diseñado asegurando la accesibilidad y la no discriminación en los ejemplos utilizados. No se recopilan datos personales de los usuarios durante el uso del simulador `Excel.html`, ya que toda la progresión (XP, Niveles) se almacena localmente en el navegador del usuario usando `localStorage`, garantizando la privacidad de la información de aprendizaje.
