@@ -31,7 +31,8 @@ El desarrollo del proyecto se ha apoyado en modelos de lenguaje de Inteligencia 
    - Ejecuta `jupyter notebook` y abre `notebooks/Proyecto_Excel.ipynb`.
 
 ## Enlace al prototipo publicado
-*[Aún no publicado - Pendiente de despliegue en Streamlit Community Cloud o GitHub Pages]*
+**Landing Page (Streamlit):** [https://excel-quest.streamlit.app/](https://excel-quest.streamlit.app/)
+**Simulador (GitHub Pages):** [https://lmarion86.github.io/excel-quest/Excel.html](https://lmarion86.github.io/excel-quest/Excel.html)
 
 ## Integrantes
 - Rodolfo Colomo, Roberto Carlos Mamani, Lucia Gonzales, Nelson Condori, Abad Bustamante
