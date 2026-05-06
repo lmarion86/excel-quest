@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Quest: El Dominio de la Hoja de Cálculo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { q: { bg: '#080d0b', card: '#0f1a15', border: '#1a2e24', text: '#e8f0ec', muted: '#5a7d6c', accent: '#00e676', gold: '#ffab00', danger: '#ff5252', dark: '#060a08', deep: '#0a120e' } }, fontFamily: { display: ['Cinzel', 'serif'], body: ['Source Sans 3', 'sans-serif'] } } } }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: #080d0b;
+            color: #e8f0ec;
+            font-family: 'Source Sans 3', sans-serif;
+            overflow-x: hidden
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #080d0b
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a2e24;
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00e676
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg)
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg)
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(0, 230, 118, 0.15)
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(0, 230, 118, 0.35)
+            }
+        }
+
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            20%,
+            60% {
+                transform: translateX(-8px)
+            }
+
+            40%,
+            80% {
+                transform: translateX(8px)
+            }
+        }
+
+        @keyframes celebrate {
+            0% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.15)
+            }
+
+            100% {
+                transform: scale(1)
+            }
+        }
+
+        @keyframes glow-pulse {
+
+            0%,
+            100% {
+                text-shadow: 0 0 10px rgba(0, 230, 118, 0.3)
+            }
+
+            50% {
+                text-shadow: 0 0 25px rgba(0, 230, 118, 0.6), 0 0 50px rgba(0, 230, 118, 0.2)
+            }
+        }
+
+        @keyframes particle-drift {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0
+            }
+
+            10% {
+                opacity: 0.6
+            }
+
+            90% {
+                opacity: 0.6
+            }
+
+            100% {
+                transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+                opacity: 0
+            }
+        }
+
+        @keyframes node-reveal {
+            from {
+                opacity: 0;
+                transform: scale(0.7)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .anim-slide-up {
+            animation: slide-up .6s ease-out both
+        }
+
+        .anim-shake {
+            animation: shake .5s ease-in-out
+        }
+
+        .anim-celebrate {
+            animation: celebrate .4s ease-in-out
+        }
+
+        .anim-glow {
+            animation: glow-pulse 2s ease-in-out infinite
+        }
+
+        .particle {
+            position: absolute;
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            color: rgba(0, 230, 118, 0.08);
+            pointer-events: none;
+            animation: particle-drift var(--dur) linear infinite;
+            white-space: nowrap
+        }
+
+        .sheet-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 13px
+        }
+
+        .sheet-ribbon {
+            background: #2d2d2d;
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            gap: 4px;
+            border-bottom: 1px solid #444;
+            min-height: 32px
+        }
+
+        .sheet-tab {
+            padding: 2px 10px;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            font-size: 11px;
+            color: #ccc;
+            background: transparent;
+            transition: .2s
+        }
+
+        .sheet-tab.active {
+            background: #1a1a1a;
+            color: #fff
+        }
+
+        .sheet-formula-bar {
+            display: flex;
+            align-items: center;
+            padding: 3px 8px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #444;
+            gap: 6px
+        }
+
+        .sheet-name-box {
+            background: #fff;
+            color: #333;
+            padding: 2px 6px;
+            border: 1px solid #555;
+            border-radius: 2px;
+            font-size: 11px;
+            min-width: 60px;
+            text-align: center
+        }
+
+        .sheet-fx {
+            color: #888;
+            font-size: 11px;
+            font-style: italic
+        }
+
+        .sheet-formula-input {
+            flex: 1;
+            background: #fff;
+            color: #333;
+            padding: 2px 6px;
+            border: 1px solid #555;
+            border-radius: 2px;
+            font-size: 12px;
+            font-family: monospace
+        }
+
+        .sheet-grid {
+            overflow: auto;
+            max-height: 340px
+        }
+
+        .sheet-grid table {
+            border-collapse: collapse
+        }
+
+        .sheet-grid th {
+            background: #2d2d2d;
+            color: #888;
+            font-size: 11px;
+            font-weight: 400;
+            padding: 2px 0;
+            min-width: 80px;
+            border: 1px solid #444;
+            position: sticky;
+            top: 0;
+            z-index: 2
+        }
+
+        .sheet-grid th.row-h {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            min-width: 35px;
+            width: 35px
+        }
+
+        .sheet-grid th.corner {
+            position: sticky;
+            left: 0;
+            top: 0;
+            z-index: 4
+        }
+
+        .sheet-grid td {
+            border: 1px solid #ddd;
+            min-height: 22px;
+            position: relative;
+            cursor: default
+        }
+
+        .sheet-grid td.cell-ro {
+            background: #fff;
+            color: #333;
+            padding: 1px 4px
+        }
+
+        .sheet-grid td.cell-edit {
+            background: #fff;
+            color: #333;
+            cursor: text
+        }
+
+        .sheet-grid td.cell-edit:focus-within {
+            outline: 2px solid #217346;
+            outline-offset: -1px
+        }
+
+        .sheet-grid td.cell-click {
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: .15s
+        }
+
+        .sheet-grid td.cell-click:hover {
+            background: #e8f5e9
+        }
+
+        .sheet-grid td.cell-correct {
+            background: #c8e6c9 !important;
+            animation: celebrate .4s
+        }
+
+        .sheet-grid td.cell-wrong {
+            background: #ffcdd2 !important;
+            animation: shake .5s
+        }
+
+        .sheet-grid td.cell-pending {
+            background: #fff9c4
+        }
+
+        .cell-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 1px 4px;
+            font-size: 12px;
+            font-family: monospace;
+            outline: none;
+            color: #333
+        }
+
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(8, 13, 11, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #1a2e24;
+            padding: 0 16px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform .3s
+        }
+
+        .xp-bar-track {
+            height: 6px;
+            background: #1a2e24;
+            border-radius: 3px;
+            flex: 1;
+            max-width: 200px;
+            overflow: hidden
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00e676, #69f0ae);
+            border-radius: 3px;
+            transition: width .8s cubic-bezier(.22, 1, .36, 1)
+        }
+
+        .level-node {
+            transition: all .3s;
+            cursor: pointer
+        }
+
+        .level-node.locked {
+            opacity: .4;
+            cursor: not-allowed;
+            filter: grayscale(1)
+        }
+
+        .level-node.completed .node-ring {
+            border-color: #00e676
+        }
+
+        .level-node.current .node-ring {
+            border-color: #ffab00;
+            animation: pulse-glow 2s infinite
+        }
+
+        .node-ring {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid #1a2e24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f1a15;
+            transition: all .3s
+        }
+
+        .level-node:not(.locked):hover .node-ring {
+            transform: scale(1.1);
+            border-color: #00e676
+        }
+
+        .exercise-panel {
+            background: #0f1a15;
+            border: 1px solid #1a2e24;
+            border-radius: 12px;
+            padding: 24px;
+            animation: slide-up .5s ease-out both
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: #080d0b;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all .2s;
+            font-size: 15px
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3)
+        }
+
+        .btn-primary:active {
+            transform: translateY(0)
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #ff8f00, #ffab00);
+            color: #080d0b
+        }
+
+        .btn-gold:hover {
+            box-shadow: 0 4px 20px rgba(255, 171, 0, 0.3)
+        }
+
+        .option-btn {
+            background: #0f1a15;
+            border: 1px solid #1a2e24;
+            color: #e8f0ec;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: left;
+            font-size: 14px;
+            width: 100%
+        }
+
+        .option-btn:hover {
+            border-color: #00e676;
+            background: #0a120e
+        }
+
+        .option-btn.correct {
+            border-color: #00e676;
+            background: rgba(0, 230, 118, 0.15);
+            color: #00e676;
+            pointer-events: none
+        }
+
+        .option-btn.wrong {
+            border-color: #ff5252;
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            pointer-events: none
+        }
+
+        .feedback-toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            animation: slide-up .3s ease-out;
+            pointer-events: none;
+            white-space: nowrap
+        }
+
+        .feedback-toast.success {
+            background: rgba(0, 230, 118, 0.15);
+            border: 1px solid #00e676;
+            color: #00e676
+        }
+
+        .feedback-toast.error {
+            background: rgba(255, 82, 82, 0.15);
+            border: 1px solid #ff5252;
+            color: #ff5252
+        }
+
+        .match-item {
+            padding: 10px 16px;
+            background: #0a120e;
+            border: 1px solid #1a2e24;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s;
+            font-size: 13px
+        }
+
+        .match-item:hover {
+            border-color: #5a7d6c
+        }
+
+        .match-item.active {
+            border-color: #ffab00;
+            background: rgba(255, 171, 0, 0.08);
+            color: #ffab00
+        }
+
+        .match-item.matched {
+            border-color: #00e676;
+            background: rgba(0, 230, 118, 0.08);
+            color: #00e676;
+            cursor: default;
+            pointer-events: none
+        }
+
+        .match-item.wrong-match {
+            border-color: #ff5252;
+            animation: shake .4s
+        }
+
+        .skill-accordion {
+            border: 1px solid #1a2e24;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all .3s
+        }
+
+        .skill-accordion.open {
+            border-color: #00e676
+        }
+
+        .skill-accordion-header {
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background .2s
+        }
+
+        .skill-accordion-header:hover {
+            background: rgba(0, 230, 118, 0.04)
+        }
+
+        .skill-accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .4s ease, padding .3s
+        }
+
+        .skill-accordion.open .skill-accordion-body {
+            max-height: 600px;
+            padding: 0 16px 16px
+        }
+
+        .skill-accordion .chevron {
+            transition: transform .3s;
+            margin-left: auto;
+            flex-shrink: 0
+        }
+
+        .skill-accordion.open .chevron {
+            transform: rotate(180deg)
+        }
+
+        .mini-table {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 11px;
+            margin: 8px 0
+        }
+
+        .mini-table table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        .mini-table th {
+            background: #2d2d2d;
+            color: #888;
+            font-size: 10px;
+            padding: 3px 8px;
+            border: 1px solid #444;
+            text-align: left
+        }
+
+        .mini-table td {
+            background: #fff;
+            color: #333;
+            padding: 2px 8px;
+            border: 1px solid #ddd;
+            font-family: monospace
+        }
+
+        .mini-table td.hl {
+            background: #e8f5e9;
+            font-weight: 600
+        }
+
+        .mini-table td.hl2 {
+            background: #fff9c4;
+            font-weight: 600
+        }
+
+        .formula-box {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #69f0ae;
+            margin: 6px 0;
+            display: inline-block
+        }
+
+        @media(max-width:640px) {
+            .sheet-grid {
+                max-height: 250px
+            }
+
+            .sheet-grid th,
+            .sheet-grid td {
+                min-width: 60px;
+                font-size: 11px
+            }
+
+            .node-ring {
+                width: 44px;
+                height: 44px
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="status-bar" id="statusBar" style="transform:translateY(-100%)">
+        <div class="font-display text-sm text-q-accent tracking-wider hidden sm:block">EXCEL QUEST</div>
+        <div class="flex items-center gap-2 flex-1 max-w-[220px]">
+            <i class="fa-solid fa-star text-q-gold text-xs"></i>
+            <div class="xp-bar-track">
+                <div class="xp-bar-fill" id="xpFill" style="width:0%"></div>
+            </div>
+            <span class="text-xs text-q-muted" id="xpLabel">0 XP</span>
+        </div>
+        <div class="flex items-center gap-4 text-xs text-q-muted">
+            <span><i class="fa-solid fa-bolt text-q-accent mr-1"></i><span id="skillCount">0</span> hab.</span>
+            <span><i class="fa-solid fa-bullseye text-q-gold mr-1"></i><span id="accuracyLabel">--</span>%</span>
+            <span class="hidden sm:inline" id="currentQuest"></span>
+        </div>
+    </div>
+
+    <div id="app" class="min-h-screen pt-12"></div>
+
+    <script>
+        var DEFAULT_STATE = { xp: 0, level: 0, completedLevels: [], skills: [], totalAttempts: 0, correctAttempts: 0, currentExercise: 0, levelAttempts: 0, levelCorrect: 0, preTestScore: null, postTestScore: null };
+        var GS = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        function saveState() { try { localStorage.setItem('excel_quest_v3', JSON.stringify(GS)) } catch (e) { } }
+        function loadState() { try { var s = JSON.parse(localStorage.getItem('excel_quest_v3')); if (s && typeof s === 'object') { GS.xp = s.xp || 0; GS.level = s.level || 0; GS.completedLevels = Array.isArray(s.completedLevels) ? s.completedLevels : []; GS.skills = Array.isArray(s.skills) ? s.skills : []; GS.totalAttempts = s.totalAttempts || 0; GS.correctAttempts = s.correctAttempts || 0; GS.currentExercise = s.currentExercise || 0; GS.levelAttempts = s.levelAttempts || 0; GS.levelCorrect = s.levelCorrect || 0; GS.preTestScore = s.preTestScore !== undefined ? s.preTestScore : null; GS.postTestScore = s.postTestScore !== undefined ? s.postTestScore : null; } } catch (e) { } }
+        function resetState() { GS = JSON.parse(JSON.stringify(DEFAULT_STATE)); saveState(); go('landing') }
+        function addXP(n) { GS.xp += n; saveState(); refreshBar() }
+        function addSkill(name) { if (GS.skills.indexOf(name) === -1) { GS.skills.push(name); saveState(); refreshBar() } }
+        function recordAttempt(ok) { GS.totalAttempts++; if (ok) GS.correctAttempts++; GS.levelAttempts++; if (ok) GS.levelCorrect++; saveState(); refreshBar() }
+        function completeLevel(id) { if (GS.completedLevels.indexOf(id) === -1) { GS.completedLevels.push(id); if (GS.level <= id) GS.level = id + 1; } GS.currentExercise = 0; GS.levelAttempts = 0; GS.levelCorrect = 0; saveState() }
+        function refreshBar() { var p = Math.min(100, (GS.xp / 1600) * 100); document.getElementById('xpFill').style.width = p + '%'; document.getElementById('xpLabel').textContent = GS.xp + ' XP'; document.getElementById('skillCount').textContent = GS.skills.length; var a = GS.totalAttempts > 0 ? Math.round((GS.correctAttempts / GS.totalAttempts) * 100) : 0; document.getElementById('accuracyLabel').textContent = GS.totalAttempts > 0 ? a : '--'; var q = document.getElementById('currentQuest'); q.textContent = (GS.level >= 1 && GS.level <= 8) ? LEVELS[GS.level - 1].shortTitle : '' }
+
+        /* ============================================================
+           DATOS DE NIVELES CON EXPLICACIONES EDUCATIVAS
+           ============================================================ */
+        var LEVELS = [
+            {
+                id: 1, title: 'El Despertar del Libro de Trabajo', shortTitle: 'Nivel 1: Interfaz', icon: 'fa-book-open',
+                narrative: 'Te encuentras ante un imponente Libro de Trabajo, cuyo poder permanece oculto tras una interfaz misteriosa. Para dominarlo, primero debes comprender cada rincón de su estructura.',
+                xpReward: 200,
+                skills: ['Cinta de opciones', 'Cuadro de Nombres', 'Barra de Fórmulas', 'Pestañas de navegación', 'Celdas y rangos'],
+                skillInfo: [
+                    { name: 'Cinta de opciones', icon: 'fa-bars', desc: 'Es la barra principal situada en la parte superior de Excel, organizada en pestañas (Inicio, Insertar, Diseño de pagina, etc.). Cada pestaña contiene grupos de herramientas relacionados entre si. Por ejemplo, en la pestana Inicio encontraras los comandos de fuente, alineacion, formato de numero y estilos de celda.', example: 'Inicio > grupo Fuente > tamaño, negrita, color' },
+                    { name: 'Cuadro de Nombres', icon: 'fa-tag', desc: 'Es un pequeno recuadro situado a la izquierda de la barra de formulas, que muestra la referencia de la celda activa (por ejemplo, A1). Puedes escribir directamente una referencia (como D15) y presionar Enter para saltar a esa celda. Tambien sirve para asignar nombres a celdas o rangos.', example: 'Escribe "D15" en el cuadro y pulsa Enter para ir a esa celda' },
+                    { name: 'Barra de Formulas', icon: 'fa-code', desc: 'Se encuentra debajo de la cinta de opciones y muestra el contenido real de la celda activa. Si una celda muestra "150" pero contiene una formula como =A1+B1, la barra de formulas te revela la formula. Es donde editas formulas complejas sin que el contenido de la celda te distraiga. Empieza con el simbolo "fx".', example: 'Celda muestra "150" > Barra de formulas muestra "=A1+B1"' },
+                    { name: 'Pestañas de navegacion', icon: 'fa-folder', desc: 'Estan en la parte inferior de la ventana: Hoja1, Hoja2, etc. Cada pestana es una hoja de calculo independiente dentro del mismo libro. Puedes agregar mas con el boton "+", renombrarlas con doble clic, y reordenarlas arrastrando.', example: 'Hoja1 | Hoja2 | Hoja3 | [+]' },
+                    { name: 'Celdas y rangos', icon: 'fa-table-cells', desc: 'Una celda es la interseccion de una columna (letra) y una fila (numero): A1, B5, C10. Un rango es un grupo de celdas contiguas expresado como "inicio:fin", por ejemplo A1:D5 selecciona un bloque de 4 columnas por 5 filas.', example: 'A1 = columna A, fila 1\nA1:D5 = bloque desde A1 hasta D5' }
+                ],
+                exercises: [
+                    { type: 'click-element', instruction: 'Haz clic en el Cuadro de Nombres en la interfaz simulada de Excel.', hint: 'Se encuentra arriba a la izquierda, entre la cinta y la hoja. Muestra "A1".', xp: 40, targets: ['name-box'] },
+                    { type: 'click-element', instruction: 'Ahora haz clic en la Barra de Formulas.', hint: 'Esta a la derecha del Cuadro de Nombres, comienza con "fx".', xp: 40, targets: ['formula-bar'] },
+                    { type: 'choice', instruction: 'En que pestana encuentras los comandos para cambiar tipo de letra, tamano y color de texto?', xp: 40, options: ['Insertar', 'Inicio', 'Diseno de pagina', 'Datos'], correct: 1, explanation: 'La pestana Inicio agrupa los comandos de formato mas utilizados.' },
+                    { type: 'grid-click', instruction: 'Haz clic en la celda C4 en la hoja de calculo.', hint: 'La columna C es la tercera y la fila 4 es la cuarta.', xp: 40, target: 'C4', gridCols: 6, gridRows: 8 },
+                    { type: 'choice', instruction: 'Cuantas hojas tiene un nuevo Libro de Trabajo de Excel por defecto?', xp: 40, options: ['1', '2', '3', '5'], correct: 0, explanation: 'Desde Excel 2013, un nuevo libro se crea con una sola hoja llamada "Hoja1".' }
+                ]
+            },
+            {
+                id: 2, title: 'La Alquimia de las Celdas', shortTitle: 'Nivel 2: Datos', icon: 'fa-flask',
+                narrative: 'Las celdas son los recipientes alquimicos de Excel. En ellas puedes destilar texto, numeros y fechas. Los maestros conocen los atajos de teclado como hechizos de velocidad.',
+                xpReward: 200,
+                skills: ['Tipos de datos', 'Atajo Ctrl+G / Ctrl+S', 'Atajo F12', 'Autorelleno', 'Edicion de celdas'],
+                skillInfo: [
+                    { name: 'Tipos de datos', icon: 'fa-database', desc: 'Excel reconoce principalmente tres tipos de datos: Texto (letras y caracteres, alineado a la izquierda por defecto), Numeros (valores con los que se pueden calcular, alineados a la derecha) y Fechas (que internamente Excel almacena como numeros secuenciales desde el 1/1/1900). Cuando escribes un dato, Excel detecta automaticamente su tipo.', example: '"Ventas" = texto (izquierda)\n2500 = numero (derecha)\n15/03/2024 = fecha (derecha)' },
+                    { name: 'Atajo Ctrl+G / Ctrl+S', icon: 'fa-floppy-disk', desc: 'Ctrl + S es el atajo universal para Guardar el archivo actual. En algunas versiones de Excel en espanol, Ctrl + G puede estar asignado a Guardar, pero es mas seguro usar Ctrl + S ya que funciona en todos los programas. Guardar frecuentemente evita perder trabajo.', example: 'Ctrl + S = Guardar\nCtrl + Shift + S o F12 = Guardar como' },
+                    { name: 'Atajo F12', icon: 'fa-file-export', desc: 'F12 abre directamente el cuadro de dialogo "Guardar como", sin necesidad de pasar por el menu Archivo. Te permite elegir un nuevo nombre, ubicacion o formato (xlsx, xlsm, csv, pdf). Es util cuando quieres crear una copia del archivo actual con otro nombre.', example: 'Presiona F12 > elige nombre y ubicacion > Guardar' },
+                    { name: 'Autorelleno', icon: 'fa-arrows-left-right', desc: 'Es el pequeno cuadrado negro que aparece en la esquina inferior derecha de una celda seleccionada. Al arrastrarlo, Excel detecta patrones y completa series automaticamente: dias de la semana, meses, numeros consecutivos, formulas copiadas, etc. Es una de las herramientas mas potentes para ser productivo.', example: 'Escribe "Lunes" > arrastra autorelleno 4 celdas a la derecha > aparecera: Mar, Mie, Jue, Vie' },
+                    { name: 'Edicion de celdas', icon: 'fa-pen', desc: 'Para editar el contenido de una celda tienes tres opciones: haz doble clic sobre ella, presiona la tecla F2 con la celda seleccionada, o haz clic directamente en la Barra de Formulas. Cada metodo es util en diferentes situaciones; F2 es particularmente rapido cuando estas navegando con el teclado.', example: 'Doble clic = editar en la celda\nF2 = editar en la celda (desde teclado)\nClic en barra de formulas = editar ahi' }
+                ],
+                exercises: [
+                    { type: 'grid-type', instruction: 'Introduce los datos correctos: texto en A1, numero en B1 y fecha en C1.', hint: 'Escribe exactamente lo que se pide. Fecha en formato dd/mm/aaaa.', xp: 50, grid: { A1: { label: 'Texto: "Ventas"', expected: 'Ventas' }, B1: { label: 'Numero: 2500', expected: '2500' }, C1: { label: 'Fecha: 15/03/2024', expected: '15/03/2024' } } },
+                    { type: 'choice', instruction: 'Que atajo de teclado se utiliza para Guardar un archivo en Excel?', xp: 30, options: ['Ctrl + G', 'Ctrl + S', 'Ctrl + A', 'Ctrl + N'], correct: 1, explanation: 'Ctrl + S guarda el archivo. Es el estandar universal.' },
+                    { type: 'choice', instruction: 'Que hace la tecla F12 en Excel?', xp: 30, options: ['Cierra el archivo', 'Abre Guardar como', 'Crea un nuevo libro', 'Abre el panel de ayuda'], correct: 1, explanation: 'F12 abre directamente el cuadro de dialogo "Guardar como".' },
+                    { type: 'choice', instruction: 'Si escribes "Lunes" en A1 y arrastras el controlador de relleno a la derecha, que aparece en B1?', xp: 30, options: ['Lunes', 'Martes', 'Lunes2', 'Error'], correct: 1, explanation: 'Excel reconoce series como dias de la semana y las completa.' },
+                    { type: 'choice', instruction: 'Que atajo te lleva a la ultima fila con datos?', xp: 30, options: ['Ctrl + Fin', 'Ctrl + Flecha Abajo', 'Fin + Flecha Abajo', 'Cualquiera de las dos anteriores'], correct: 3, explanation: 'Tanto Ctrl + Flecha Abajo como Fin + Flecha Abajo te llevan al borde del rango.' },
+                    { type: 'choice', instruction: 'Que atajo te lleva a la ultima columna con datos?', xp: 30, options: ['Ctrl + Flecha Derecha', 'Alt + Flecha Derecha', 'Shift + Flecha Derecha', 'Tab'], correct: 0, explanation: 'Ctrl + Flecha Derecha se desplaza a la ultima columna con datos del rango actual.' }
+                ]
+            },
+            {
+                id: 3, title: 'El Código de los Operadores', shortTitle: 'Nivel 3: Formulas', icon: 'fa-calculator',
+                narrative: 'Las formulas son el codigo secreto de Excel. Dominar los operadores aritmeticos y el orden de operaciones te permite realizar calculos poderosos. Todo hechizo en Excel comienza con =.',
+                xpReward: 200,
+                skills: ['Operadores aritmeticos', 'Orden de operaciones', 'Formulas basicas', 'Presupuesto dinamico', 'Referencias de celda'],
+                skillInfo: [
+                    { name: 'Operadores aritmeticos', icon: 'fa-plus-minus', desc: 'Excel usa los mismos operadores que las matematicas basicas: + (suma), - (resta), * (multiplicacion), / (division). Tambien existe ^ para potencias (ej: =2^3 da 8) y % para porcentaje. Estos operadores se combinan con referencias de celda para crear calculos dinamicos.', example: '=A1+B1 suma dos celdas\n=A1*B1 multiplica\n=A1/B1 divide\n=A1^2 eleva al cuadrado' },
+                    { name: 'Orden de operaciones', icon: 'fa-sort-numeric-up', desc: 'Excel sigue la jerarquia matematica estandar: primero parentesis (), luego potencias ^, luego multiplicacion y division * / (de izquierda a derecha), y finalmente suma y resta + -. Si escribes =10+5*2 el resultado es 20, no 30, porque Excel multiplica primero. Usa parentesis para cambiar el orden: =(10+5)*2 da 30.', example: '=10+5*2 = 20 (multiplica primero)\n=(10+5)*2 = 30 (parentesis primero)\n=2+3*4/2 = 8 (3*4=12, 12/2=6, 2+6=8)' },
+                    { name: 'Formulas basicas', icon: 'fa-equals', desc: 'Toda formula en Excel DEBE comenzar con el signo igual (=). Sin el =, Excel interpretara lo que escribas como texto simple. Despues del = puedes escribir numeros directos (=5+3), referencias de celda (=A1+B1), o combinar ambos (=A1*2+10).', example: '=5+3 muestra 8\n=A1+B1 muestra la suma de ambas celdas\n=A1*2+10 multiplica A1 por 2 y suma 10' },
+                    { name: 'Presupuesto dinamico', icon: 'fa-wallet', desc: 'Un presupuesto dinamico es aquel que se recalcula automaticamente cuando cambias algun valor de entrada. Si A1 es tu ingreso y A2:A4 son tus gastos, la formula =A1-SUMA(A2:A4) dara el saldo restante. Si cambias un gasto, el saldo se actualiza solo. Esta es la verdadera potencia de Excel.', example: 'Ingreso: 5000\nRenta: -1200\nComida: -800\nTransporte: -300\nSaldo: =5000-1200-800-300 = 2700' },
+                    { name: 'Referencias de celda en formulas', icon: 'fa-link', desc: 'En lugar de escribir numeros fijos (constantes) en tus formulas, usa referencias de celda (A1, B5, etc.). Esto hace que la formula sea dinamica: si el valor de A1 cambia, el resultado de la formula cambia automaticamente. Las constantes te obligan a editar la formula manualmente cada vez.', example: 'Mal: =100+200+300 (numeros fijos)\nBien: =A1+A2+A3 (se actualiza solo)' }
+                ],
+                exercises: [
+                    { type: 'formula-input', instruction: 'A1 contiene 10 y B1 contiene 20. Escribe la operacion que sume ambas celdas.', xp: 30, context: { A1: 10, B1: 20 }, answerCell: 'C1', acceptedAnswers: ['=a1+b1', '=b1+a1'], displayResult: 30 },
+                    { type: 'formula-input', instruction: 'A1=10, B1=20, C1=5. Escribe en D1 una formula que sume A1 y B1, luego multiplique por C1. Usa parentesis.', xp: 40, context: { A1: 10, B1: 20, C1: 5 }, answerCell: 'D1', acceptedAnswers: ['=(a1+b1)*c1', '=(b1+a1)*c1'], displayResult: 150 },
+                    { type: 'choice', instruction: 'Cual es el resultado de =10+5*2 en Excel?', xp: 30, options: ['30', '20', '25', '40'], correct: 1, explanation: 'Primero multiplicacion (5*2=10), luego suma (10+10=20).' },
+                    { type: 'formula-input', instruction: 'Presupuesto: A1=5000, A2=1200, A3=800, A4=300. Escribe en A5 el saldo restante.', xp: 50, context: { A1: 5000, A2: 1200, A3: 800, A4: 300, B1: 'Ingreso', B2: 'Renta', B3: 'Comida', B4: 'Transporte', B5: 'Saldo' }, answerCell: 'A5', acceptedAnswers: ['=a1-a2-a3-a4', '=a1-(a2+a3+a4)'], displayResult: 2700 },
+                    { type: 'choice', instruction: 'Si escribes =A1+A2 en C1 y copias a C2, que aparece?', xp: 30, options: ['=A1+A2', '=A2+A3', '=B1+B2', 'Depende del tipo de referencia'], correct: 1, explanation: 'Referencias relativas: al copiar una fila abajo, las filas se incrementan.' },
+                    { type: 'formula-input', instruction: 'A1=100, A2=15. Escribe en B1 el porcentaje que A2 representa de A1.', xp: 30, context: { A1: 100, A2: 15 }, answerCell: 'B1', acceptedAnswers: ['=a2/a1', '=a2/a1*100'], displayResult: '15%' }
+                ]
+            },
+            {
+                id: 4, title: 'Las Referencias Sagradas', shortTitle: 'Nivel 4: Referencias', icon: 'fa-lock',
+                narrative: 'Existe un poder mayor en Excel: la capacidad de fijar celdas usando el simbolo dolar ($). Comprender las diferencias entre referencias relativas, absolutas y mixtas es lo que separa al aprendiz del verdadero arquitecto.',
+                xpReward: 200,
+                skills: ['Referencias relativas', 'Referencias absolutas ($A$1)', 'Referencias mixtas ($A1, A$1)', 'Tecla F4', 'Tabla de multiplicar con $'],
+                skillInfo: [
+                    { name: 'Referencias relativas', icon: 'fa-arrows-alt', desc: 'Es el comportamiento por defecto de Excel. Cuando escribes =A1 en B1 y copias la formula a B2, Excel cambia automaticamente la referencia a =A2. Excel ajusta las referencias en funcion de cuantas filas y columnas te has movido al copiar. Son "relativas" a la posicion de la formula.', example: 'B1: =A1\nCopiar B1 a B2\nB2: =A2 (se ajusta automaticamente)' },
+                    { name: 'Referencias absolutas ($A$1)', icon: 'fa-lock', desc: 'Al poner un signo $ antes de la columna y antes de la fila ($A$1), la referencia queda FIJA. Si copias =A1 a otra celda, cambia. Pero si copias =$A$1, seguira apuntando a A1 sin importar donde la pegues. Se usa cuando necesitas que una formula siempre haga referencia a la misma celda (como una tasa de cambio fija).', example: 'B1: =$A$1\nCopiar B1 a B2\nB2: =$A$1 (no cambia, sigue apuntando a A1)' },
+                    { name: 'Referencias mixtas ($A1, A$1)', icon: 'fa-arrows-left-right-to-line', desc: 'Puedes fijar solo la columna o solo la fila. $A1 fija la columna A pero la fila cambia al copiar verticalmente. A$1 fija la fila 1 pero la columna cambia al copiar horizontalmente. Son utiles para tablas de busqueda y tablas de multiplicar.', example: '$A1: columna fija, fila libre\nA$1: fila fija, columna libre\n$A$1: ambas fijas\nA1: ambas libres' },
+                    { name: 'Tecla F4', icon: 'fa-keyboard', desc: 'Cuando estas editando una formula, presionar F2 para editar y luego F4 sobre una referencia alterna ciclicamente entre los cuatro tipos: A1 > $A$1 > A$1 > $A1 > A1. Es el metodo mas rapido para cambiar el tipo de referencia sin tener que escribir los $ manualmente.', example: 'Escribe =A1 en la formula\nPresiona F4 > =$A$1\nPresiona F4 > =A$1\nPresiona F4 > =$A1\nPresiona F4 > =A1 (vuelve al inicio)' },
+                    { name: 'Tabla de multiplicar con $', icon: 'fa-table', desc: 'El ejemplo clasico de referencias mixtas: si los numeros 1-5 estan en la fila 1 (B1:F1) y en la columna A (A2:A6), la formula =$A2*B$1 en B2 se copia correctamente a todo el rango. $A2 fija la columna del multiplicando, B$1 fija la fila del multiplicador.', example: 'B2: =$A2*B$1 (1x1=1)\nCopiar a C2: =$A2*C$1 (1x2=2)\nCopiar a B3: =$A3*B$1 (2x1=2)\nCopiar a C3: =$A3*C$1 (2x2=4)' }
+                ],
+                exercises: [
+                    { type: 'choice', instruction: 'Que significa $A$1 en una formula?', xp: 40, options: ['La celda A1 puede cambiar de fila pero no de columna', 'Tanto la columna como la fila estan fijas', 'Es una referencia a la hoja llamada "A"', 'Significa "suma de A1"'], correct: 1, explanation: '$A$1 es una referencia absoluta: el $ fija tanto columna como fila.' },
+                    { type: 'choice', instruction: 'En $A1, que queda fijo al copiar la formula?', xp: 40, options: ['La fila 1', 'La columna A', 'Ambas', 'Ninguna'], correct: 1, explanation: 'En $A1 solo la columna A esta fija. La fila puede cambiar.' },
+                    { type: 'formula-input', instruction: 'Quieres que una formula en B2 siempre se refiera a A1. Escribe =A1 con referencia absoluta.', xp: 50, context: { A1: 100 }, answerCell: 'B2', acceptedAnswers: ['=$a$1'], displayResult: 100, bonusXP: 25 },
+                    { type: 'choice', instruction: 'Tienes en B2: =A2*$B$1. Al copiar a C3, que formula resulta?', xp: 40, options: ['=B3*$B$1', '=A3*$C$1', '=B3*$C$2', '=A2*$B$1'], correct: 0, explanation: 'A2 es relativa y cambia a B3. $B$1 es absoluta y no cambia.' },
+                    { type: 'formula-input', instruction: 'Fila 1 tiene 1-5, Columna A tiene 1-5. Escribe en B2 la formula que multiplique A2 por B1, fijando para copiar a todo el rango.', xp: 60, context: { B1: 1, C1: 2, D1: 3, E1: 4, F1: 5, A2: 1, A3: 2, A4: 3, A5: 4, A6: 5 }, answerCell: 'B2', acceptedAnswers: ['=$a2*b$1'], displayResult: 1, bonusXP: 30 }
+                ]
+            },
+            {
+                id: 5, title: 'El Oraculo de las Funciones', shortTitle: 'Nivel 5: Funciones', icon: 'fa-hat-wizard',
+                narrative: 'Las funciones son los hechizos supremos de Excel. SUMA, PROMEDIO, CONTAR, MAX y MIN son los cinco pilares estadisticos. Y luego esta la poderosa funcion SI, capaz de tomar decisiones logicas.',
+                xpReward: 200,
+                skills: ['Funcion SUMA', 'Funcion PROMEDIO', 'Funcion CONTAR', 'Funcion MAX', 'Funcion MIN', 'Funcion SI'],
+                skillInfo: [
+                    { name: 'Funcion SUMA', icon: 'fa-plus', desc: 'Suma todos los numeros de un rango. Sintaxis: =SUMA(rango). Es la funcion mas utilizada en Excel. En lugar de escribir =A1+A2+A3+A4+A5, puedes escribir =SUMA(A1:A5). El operador : (dos puntos) significa "desde...hasta..." y crea un rango continuo.', example: '=SUMA(A1:A5) suma los valores de A1 hasta A5\n=SUMA(A1:A5,C1:C5) suma dos rangos distintos' },
+                    { name: 'Funcion PROMEDIO', icon: 'fa-chart-line', desc: 'Calcula la media aritmetica de los numeros en un rango. Sintaxis: =PROMEDIO(rango). Equivale a sumar todos los valores y dividir entre la cantidad de valores. Ignora celdas vacias pero si cuenta celdas con valor 0.', example: 'A1:A5 = 10, 20, 30, 40, 50\n=PROMEDIO(A1:A5) = (10+20+30+40+50)/5 = 30' },
+                    { name: 'Funcion CONTAR', icon: 'fa-list-ol', desc: 'Cuenta cuantas celdas del rango contienen NUMEROS. No cuenta texto, celdas vacias ni errores. Sintaxis: =CONTAR(rango). Si necesitas contar todo (incluyendo texto), usa =CONTARA(). Si necesitas contar con una condicion, usa =CONTAR.SI().', example: 'A1:A5 = 10, "Hola", 30, "", 50\n=CONTAR(A1:A5) = 3 (solo cuenta 10, 30, 50)\n=CONTARA(A1:A5) = 4 (cuenta todo excepto vacias)' },
+                    { name: 'Funcion MAX', icon: 'fa-arrow-up', desc: 'Devuelve el valor NUMERICO mas alto de un rango. Sintaxis: =MAX(rango). Su complemento es =MIN(rango) que devuelve el valor mas bajo. Ambas ignoran celdas vacias y texto.', example: 'A1:A5 = 10, 25, 8, 42, 15\n=MAX(A1:A5) = 42\n=MIN(A1:A5) = 8' },
+                    { name: 'Funcion MIN', icon: 'fa-arrow-down', desc: 'Devuelve el valor numerico mas bajo de un rango. Sintaxis: =MIN(rango). Es el complemento de MAX. Combinadas, MAX y MIN te dan el rango completo de tus datos (valor maximo y minimo).', example: 'A1:A5 = 10, 25, 8, 42, 15\n=MIN(A1:A5) = 8\nRango = MAX - MIN = 42 - 8 = 34' },
+                    { name: 'Funcion SI', icon: 'fa-code-branch', desc: 'Toma una decision logica basada en una condicion. Sintaxis: =SI(condicion, valor_si_verdadero, valor_si_falso). La condicion usa operadores de comparacion: = (igual), > (mayor), < (menor), >= (mayor o igual), <= (menor o igual), <> (diferente). Puedes anidar funciones SI para multiples condiciones.', example: '=SI(B1>=60,"Aprobado","Reprobado")\nSi B1=85 > muestra "Aprobado"\nSi B1=45 > muestra "Reprobado"\n\nAnidada: =SI(B1>=90,"Excelente",SI(B1>=60,"Bien","Reprobado"))' }
+                ],
+                exercises: [
+                    { type: 'formula-input', instruction: 'A1:A5 contienen: 10, 20, 30, 40, 50. Escribe en B1 la funcion que obtenga la suma.', xp: 30, context: { A1: 10, A2: 20, A3: 30, A4: 40, A5: 50 }, answerCell: 'B1', acceptedAnswers: ['=suma(a1:a5)', '=sum(a1:a5)'], displayResult: 150 },
+                    { type: 'formula-input', instruction: 'Con los mismos datos, escribe en B2 la funcion que calcule el promedio.', xp: 30, context: { A1: 10, A2: 20, A3: 30, A4: 40, A5: 50 }, answerCell: 'B2', acceptedAnswers: ['=promedio(a1:a5)', '=average(a1:a5)'], displayResult: 30 },
+                    { type: 'match', instruction: 'Relaciona cada funcion con su descripcion correcta.', xp: 40, pairs: [{ left: 'SUMA', right: 'Suma todos los valores del rango' }, { left: 'PROMEDIO', right: 'Calcula la media aritmetica' }, { left: 'CONTAR', right: 'Cuenta celdas con numeros' }, { left: 'MAX', right: 'Devuelve el valor mas alto' }, { left: 'MIN', right: 'Devuelve el valor mas bajo' }] },
+                    { type: 'formula-input', instruction: 'B1 contiene 85. Escribe en C1 una funcion SI: si B1>=60 "Aprobado", si no "Reprobado".', xp: 50, context: { B1: 85 }, answerCell: 'C1', acceptedAnswers: ['=si(b1>=60,"aprobado","reprobado")'], displayResult: 'Aprobado' },
+                    { type: 'formula-input', instruction: 'Ahora B1 contiene 45. Escribe la misma funcion SI para esta calificacion.', xp: 30, context: { B1: 45 }, answerCell: 'C1', acceptedAnswers: ['=si(b1>=60,"aprobado","reprobado")'], displayResult: 'Reprobado' },
+                    { type: 'choice', instruction: 'Cual es la estructura correcta de la funcion SI?', xp: 30, options: ['=SI(prueba_logica; valor_si_verdadero; valor_si_falso)', '=SI(verdadero, falso, condicion)', '=SI(condicion, valor)', '=SI(valor_si_falso, prueba_logica, valor_si_verdadero)'], correct: 0, explanation: 'La sintaxis es =SI(prueba_logica, valor_si_verdadero, valor_si_falso).' }
+                ]
+            },
+            {
+                id: 6, title: 'El Arquitecto de Reportes', shortTitle: 'Nivel 6: Tablas y Graficos', icon: 'fa-chart-column',
+                narrative: 'Un verdadero arquitecto transforma datos brutos en estructuras elegantes. Las Tablas oficiales otorgan poderes de organizacion automatica, y los graficos son las ventanas que permiten visualizar la historia que los numeros cuentan.',
+                xpReward: 200,
+                skills: ['Tablas de datos', 'Filtros automaticos', 'Graficos de columnas', 'Graficos de lineas', 'Graficos circulares', 'Seleccion de grafico'],
+                skillInfo: [
+                    { name: 'Tablas de datos', icon: 'fa-table', desc: 'Convertir un rango en Tabla oficial (Inicio > Dar formato como tabla o Ctrl+T) activa multiples funciones automaticas: filtros en cada columna, bandas de filas alternadas para mejor lectura, rangos que se expanden automaticamente al agregar datos, y referencias estructuradas en formulas (ej: =SUMA(Tabla1[Ventas]) en lugar de =SUMA(B2:B100)).', example: 'Selecciona un rango > Ctrl + T > Aceptar\nAhora tienes: filtros, formato, rangos dinamicos' },
+                    { name: 'Filtros automaticos', icon: 'fa-filter', desc: 'Al convertir datos en Tabla (o usar Datos > Filtro), aparecen pequenas flechas en los encabezados de columna. Al hacer clic puedes filtrar por valores especificos, ordenar ascendente/descendentemente, o crear filtros personalizados. Solo se muestran las filas que cumplen el criterio; las demas se ocultan sin eliminarse.', example: 'Clic en flecha de "Categoria" > desmarcar "Oficina" > Aceptar\nAhora solo se ven las filas que NO son "Oficina"' },
+                    { name: 'Graficos de columnas', icon: 'fa-chart-column', desc: 'Usan barras verticales para comparar valores entre categorias. Son ideales para mostrar diferencias de tamano entre elementos discretos (ventas por mes, por producto, por region). El eje X tiene las categorias y el eje Y los valores. Se inserta desde Insertar > Grafico de columnas.', example: 'Eje X: Ene, Feb, Mar, Abr\nEje Y: 100, 150, 120, 180\nCada barra representa un mes' },
+                    { name: 'Graficos de lineas', icon: 'fa-chart-line', desc: 'Conectan puntos de datos con lineas continuas. Son la mejor opcion para mostrar TENDENCIAS a lo largo del tiempo (evolucion de ventas, crecimiento, temperatura). El eje X suele ser temporal. Cuando hay multiples series, cada una se muestra como una linea de diferente color.', example: 'Meses en X: Ene a Dic\nVentas en Y: linea continua\nMuestra si las ventas suben, bajan o se estabilizan' },
+                    { name: 'Graficos circulares', icon: 'fa-chart-pie', desc: 'Muestran PROPORCIONES: cada "rebanada" representa la parte que un valor contribuye al total (100%). Son ideales cuando tienes pocos categorias (2-6) y quieres mostrar como se distribuye un todo. No son buenos para mostrar tendencias ni para muchos datos.', example: 'Total ventas: 1000\nNorte: 400 (40% - rebanada grande)\nSur: 300 (30%)\nEste: 200 (20%)\nOeste: 100 (10%)' },
+                    { name: 'Seleccion de grafico adecuado', icon: 'fa-lightbulb', desc: 'La regla general: Comparar categorias = columnas. Mostrar tendencia temporal = lineas. Mostrar proporciones de un todo = circular. Relacion entre dos variables = dispersion. Para crear rapido: selecciona datos y presiona Alt+F1 (embebido) o F11 (en hoja nueva).', example: 'Comparar ventas por region > Columnas\nVentas mensuales 12 meses > Lineas\nParticipacion por producto > Circular\nPrecio vs demanda > Dispersion' }
+                ],
+                exercises: [
+                    { type: 'choice', instruction: 'Cual es la principal ventaja de convertir un rango en Tabla oficial?', xp: 40, options: ['Solo cambia el color', 'Anade filtros automaticos, rangos dinamicos y estilos estructurados', 'Bloquea las celdas', 'Convierte numeros en texto'], correct: 1, explanation: 'Las Tablas anaden filtros, rangos dinamicos y referencias estructuradas.' },
+                    { type: 'choice', instruction: 'Tienes datos de ventas mensuales durante un ano. Que grafico muestra mejor la tendencia?', xp: 40, options: ['Circular', 'De columnas', 'De lineas', 'De dispersion'], correct: 2, explanation: 'Los graficos de lineas son ideales para tendencias a lo largo del tiempo.' },
+                    { type: 'choice', instruction: 'Quieres mostrar la proporcion de ventas por 5 categorias. Que grafico usaras?', xp: 40, options: ['De lineas', 'De columnas agrupadas', 'Circular', 'De dispersion'], correct: 2, explanation: 'Los graficos circulares son perfectos para proporciones de un todo.' },
+                    { type: 'match', instruction: 'Relaciona cada tipo de dato con el grafico mas apropiado.', xp: 50, pairs: [{ left: 'Tendencia de ventas mensual', right: 'Grafico de lineas' }, { left: 'Comparacion por region', right: 'Grafico de columnas' }, { left: 'Participacion de mercado', right: 'Grafico circular' }, { left: 'Precio vs demanda', right: 'Grafico de dispersion' }] },
+                    { type: 'choice', instruction: 'Cual es el atajo para crear un grafico instantaneo?', xp: 30, options: ['Ctrl + G', 'Alt + F1', 'F11', 'Tanto Alt + F1 como F11'], correct: 3, explanation: 'Alt + F1 crea grafico embebido. F11 lo crea en hoja nueva.' }
+                ]
+            },
+            {
+                id: 7, title: 'El Formato Condicional y la Validacion', shortTitle: 'Nivel 7: Formato Condicional', icon: 'fa-palette',
+                narrative: 'Las celdas pueden hablar por si mismas. El formato condicional les da vida cambiando de color segun su valor. La validacion de datos es el guardia que protege tus hojas de errores de entrada.',
+                xpReward: 200,
+                skills: ['Formato condicional', 'Reglas de resaltado', 'Escalas de color', 'Validacion de datos', 'Lista desplegable', 'Errores comunes'],
+                skillInfo: [
+                    { name: 'Formato condicional', icon: 'fa-paintbrush', desc: 'Es una herramienta que aplica formato automaticamente (colores, iconos, barras de datos) basandose en el valor de la celda. Se accede desde Inicio > Formato condicional. La celda cambia su apariencia sin necesidad de que el usuario haga nada manualmente; el formato se actualiza si el valor cambia.', example: 'Si A1 >= 70 > fondo verde\nSi A1 < 70 > fondo rojo\nSi cambias A1 de 85 a 60 > el fondo cambia de verde a rojo automaticamente' },
+                    { name: 'Reglas de resaltado', icon: 'fa-highlighter', desc: 'Dentro de Formato condicional, "Reglas para resaltar celdas" es la opcion mas comun. Puedes crear reglas como: "Es mayor que...", "Es menor que...", "Es igual a...", "Texto que contiene...". Cada regla tiene su propio formato (fondo, fuente, bordes). Puedes tener multiples reglas activas a la vez.', example: 'Regla 1: Mayor o igual que 70 > verde\nRegla 2: Menor que 70 > rojo\nRegla 3: Texto "Pendiente" > amarillo' },
+                    { name: 'Escalas de color', icon: 'fa-gradient', desc: 'Otra opcion dentro de Formato condicional. Aplica un degradado de colores a un rango: los valores bajos en un color, los altos en otro, y los intermedios en tonos medios. Existen escalas de 2 colores (minimo-maximo) y de 3 colores (minimo-punto medio-maximo). Son excelentes para identificar rapidamente valores atipicos.', example: 'Escala 2 colores (verde a rojo):\nValor mas bajo = verde claro\nValores medios = amarillo\nValor mas alto = rojo intenso' },
+                    { name: 'Validacion de datos', icon: 'fa-shield-halved', desc: 'Es una herramienta (Datos > Validacion de datos) que restringe QUE puede escribirse en una celda. Puedes limitar a: numeros enteros, decimales, una lista de opciones, fechas, longitudes de texto. Si el usuario intenta escribir algo no permitido, aparece un mensaje de error que tu puedes personalizar.', example: 'Celda: Solo numeros enteros entre 1 y 100\nSi el usuario escribe "Hola" > Error: "Solo se permiten numeros del 1 al 100"' },
+                    { name: 'Lista desplegable', icon: 'fa-caret-down', desc: 'Se crea usando Validacion de datos > Permitir: Lista. En "Origen" escribes los valores separados por coma (Si, No, Tal vez) o seleccionas un rango de celdas. La celda mostrara una flecha desplegable con las opciones disponibles. Es la forma mas facil de estandarizar entradas de datos y evitar errores de tipeo.', example: 'Validacion > Permitir: Lista > Origen: Si, No, Tal vez\nLa celda ahora muestra una flecha con esas 3 opciones' },
+                    { name: 'Errores comunes', icon: 'fa-bug', desc: 'Conocer los errores mas frecuentes de Excel te ahorrara horas de frustracion: #DIV/0! = division entre cero. #N/A = valor no encontrado (BUSCARV). #VALOR! = tipo de dato incorrecto en formula. #NOMBRE? = funcion mal escrita. ##### = columna demasiado estrecha (no es realmente un error de formula).', example: '#DIV/0! > cambia el divisor por algo != 0\n#N/A > verifica que el dato buscado existe\n#VALOR! > revisa que no estes sumando texto\n#NOMBRE? > revisa la ortografia de la funcion\n##### > amplia la columna' }
+                ],
+                exercises: [
+                    { type: 'choice', instruction: 'Quieres que calificaciones >=70 se pinten verde y <70 rojo. Que herramienta usas?', xp: 40, options: ['Fuente condicional', 'Formato condicional > Reglas para resaltar celdas', 'Estilo de celda', 'Buscar y reemplazar'], correct: 1, explanation: 'Formato Condicional > Reglas para resaltar celdas permite formato basado en valor.' },
+                    { type: 'choice', instruction: 'Configuras validacion para solo enteros 1-100. Un usuario escribe "Hola". Que sucede?', xp: 40, options: ['Excel acepta el texto', 'Se muestra un mensaje de error y no se acepta el valor', 'La celda se borra', 'Excel se cierra'], correct: 1, explanation: 'La validacion bloquea la entrada incorrecta y muestra un cuadro de error.' },
+                    { type: 'choice', instruction: 'Como creas una lista desplegable con Validacion de Datos?', xp: 40, options: ['Celda > Lista > Insertar', 'Validacion de Datos > Permitir: Lista > Origen: valores separados por coma', 'Formato Condicional > Lista', 'Insertar > Desplegable'], correct: 1, explanation: 'En Validacion de Datos, seleccionas "Lista" y escribes valores separados por coma.' },
+                    { type: 'match', instruction: 'Relaciona cada error de Excel con su causa.', xp: 50, pairs: [{ left: '#VALOR!', right: 'Tipo de dato incorrecto en la formula' }, { left: '#N/A', right: 'Valor no disponible' }, { left: '#####', right: 'Columna demasiado estrecha' }, { left: '#DIV/0!', right: 'Division entre cero' }, { left: '#NOMBRE?', right: 'Funcion mal escrita' }] },
+                    { type: 'choice', instruction: 'Ves ##### en una celda con fecha. Solucion mas probable?', xp: 30, options: ['Borrar y reescribir', 'Cambiar formato a numero', 'Aumentar el ancho de la columna', 'Usar funcion FECHA'], correct: 2, explanation: '##### aparece cuando el contenido es mas ancho que la columna.' }
+                ]
+            },
+            {
+                id: 8, title: 'El Desafio Final: Maestro Excel', shortTitle: 'Nivel 8: Desafio Final', icon: 'fa-crown',
+                narrative: 'Has recorrido todos los reinos. Ahora enfrentas el desafio final: construir un Dashboard completo que demuestre tu dominio absoluto de Excel. Diagnostica errores, aplica funciones avanzadas y presenta resultados como un verdadero Maestro.',
+                xpReward: 300,
+                skills: ['Diagnostico de errores', 'Rastrear precedentes', 'Funciones combinadas', 'SI anidada', 'Dashboard completo', 'Presentacion profesional'],
+                skillInfo: [
+                    { name: 'Diagnostico de errores', icon: 'fa-stethoscope', desc: 'Cuando una formula muestra un error (#VALOR!, #DIV/0!, etc.), el proceso de diagnostico es: 1) Identificar el tipo de error. 2) Hacer clic en la celda con error. 3) Revisar la formula en la barra de formulas. 4) Verificar cada referencia para encontrar la causa. 5) Corregir y verificar que el error desaparezca.', example: 'Paso 1: Ves #DIV/0! en B4\nPaso 2: Clic en B4, ves =A3/A4\nPaso 3: A4 contiene 0\nPaso 4: La division entre 0 causa el error\nPaso 5: Cambia a =SI(A4=0,"N/A",A3/A4)' },
+                    { name: 'Rastrear precedentes', icon: 'fa-magnifying-glass-chart', desc: 'Es una herramienta en la pestana Formulas que dibuja flechas desde las celdas que alimentan una formula hacia la formula misma. "Rastrear precedentes" muestra de donde viene el dato. "Rastrear dependientes" muestra que formulas dependen de la celda activa. "Quitar flechas" las elimina. Es invaluable para encontrar errores en cadenas de calculos largas.', example: 'Celda D5 tiene error\nFormulas > Rastrear precedentes\nFlechas senalan: D5 depende de C5, C5 depende de B5, B5 depende de A5\nEl error esta en A5' },
+                    { name: 'Funciones combinadas', icon: 'fa-layer-group', desc: 'En un Dashboard real combinas multiples funciones en diferentes celdas: SUMA para totales, PROMEDIO para medias, MAX y MIN para extremos, CONTAR para cantidades. Cada funcion va en su propia celda y todas se alimentan del mismo rango de datos. Si los datos cambian, todo el Dashboard se actualiza.', example: 'B1: =SUMA(A1:A10) > Total\nB2: =PROMEDIO(A1:A10) > Media\nB3: =MAX(A1:A10) > Maximo\nB4: =MIN(A1:A10) > Minimo\nB5: =CONTAR(A1:A10) > Cantidad' },
+                    { name: 'SI anidada', icon: 'fa-code-branch', desc: 'Puedes poner una funcion SI dentro de otra para evaluar multiples condiciones. La estructura es: =SI(condicion1, valor1, SI(condicion2, valor2, valor_por_defecto)). Excel evalua de izquierda a derecha: si la primera condicion es falsa, pasa a la segunda, y asi sucesivamente. Puedes anidar hasta 64 funciones SI.', example: '=SI(B2>=90,"Excelente",SI(B2>=70,"Bueno",SI(B2>=60,"Regular","Reprobado")))\n\nSi B2=95 > "Excelente"\nSi B2=75 > "Bueno"\nSi B2=62 > "Regular"\nSi B2=45 > "Reprobado"' },
+                    { name: 'Dashboard completo', icon: 'fa-gauge-high', desc: 'Un Dashboard es una vista consolidada que presenta los datos mas importantes de forma visual y clara. Incluye: resumenes numericos (totales, promedios), tablas organizadas con filtros, graficos que muestran tendencias y proporciones, y formato condicional que resalta lo relevante. Todo debe caber en una sola pantalla.', example: 'Seccion superior: KPIs (Total ventas, Promedio, Max, Min)\nSeccion izquierda: Tabla con datos y filtros\nSeccion derecha: Graficos (columnas + circular)\nFormato condicional en valores criticos' },
+                    { name: 'Presentacion profesional', icon: 'fa-display', desc: 'Para presentar un Dashboard limpio, ve a la pestana Vista y desmarca: "Lineas de cuadriguea" (quita la cuadricula blanca), "Encabezados" (quita las letras de columna y numeros de fila). Tambien puedes ocultar la barra de formulas desde Archivo > Opciones > Avanzadas. El resultado es un reporte limpio que parece hecho en un software de diseno.', example: 'Vista > desmarcar "Lineas de cuadrigea"\nVista > desmarcar "Encabezados"\nResultado: fondo blanco limpio, solo tus datos y graficos visibles' }
+                ],
+                exercises: [
+                    {
+                        type: 'error-fix', instruction: 'Diagnostica y corrige los errores. Escribe la formula correcta en cada campo.', xp: 60, errors: [
+                            { cell: 'B2', correctFormula: '=a2+5', errorType: '#VALOR!', cause: 'Suma numero con texto' },
+                            { cell: 'B4', correctFormula: '=si(a4=0,"sin datos",a3/a4)', errorType: '#DIV/0!', cause: 'Division entre cero' },
+                            { cell: 'B6', correctFormula: '=suma(a5:a7)', errorType: '#NOMBRE?', cause: 'Funcion mal escrita' }
+                        ], context: { A2: 100, A3: 50, A4: 0, A5: 10, A6: 20, A7: 30 }
+                    },
+                    { type: 'choice', instruction: 'Que herramienta permite ver de que celdas depende una formula?', xp: 30, options: ['Revisar ortografia', 'Formulas > Rastrear precedentes', 'Datos > Validacion', 'Inicio > Buscar y reemplazar'], correct: 1, explanation: 'Rastrear precedentes dibuja flechas que muestran que celdas alimentan una formula.' },
+                    { type: 'formula-input', instruction: 'A1:A5 tienen ventas: 150, 200, 180, 220, 190. Escribe en B1 la suma.', xp: 30, context: { A1: 150, A2: 200, A3: 180, A4: 220, A5: 190 }, answerCell: 'B1', acceptedAnswers: ['=suma(a1:a5)'], displayResult: 940, multiStep: [{ cell: 'B2', answers: ['=promedio(a1:a5)'], result: 188 }, { cell: 'B3', answers: ['=max(a1:a5)'], result: 220 }] },
+                    { type: 'formula-input', instruction: 'En C1, escribe SI anidada: si B2>=200 "Excelente", si >=150 "Bueno", si no "Mejorar".', xp: 50, context: { B2: 188 }, answerCell: 'C1', acceptedAnswers: ['=si(b2>=200,"excelente",si(b2>=150,"bueno","mejorar"))'], displayResult: 'Bueno' },
+                    { type: 'choice', instruction: 'Para presentar tu Dashboard profesional, que elementos deberias eliminar?', xp: 30, options: ['Los graficos y tablas', 'Las lineas de cuadrigea y encabezados', 'Los colores y formatos condicionales', 'Todas las formulas'], correct: 1, explanation: 'Ve a Vista > desmarca "Lineas de cuadrigea" y "Encabezados".' },
+                    { type: 'choice', instruction: 'Como configuras la vista para una presentacion profesional?', xp: 30, options: ['F5', 'Alt + F11', 'Desde Vista: ocultar cuadrigea, encabezados y barra de formulas', 'Ctrl + F5'], correct: 2, explanation: 'Se configuran las opciones de visualizacion desde la pestana Vista.' }
+                ]
+            }
+        ];
+
+        /* ============================================================
+           NAVEGACION
+           ============================================================ */
+        var currentView = 'landing', currentLevelIdx = -1, currentExIdx = 0, toastTimer = null;
+        function go(view, data) {
+            currentView = view;
+            var app = document.getElementById('app'), sb = document.getElementById('statusBar');
+            try {
+                if (view === 'landing') { sb.style.transform = 'translateY(-100%)'; app.innerHTML = buildLanding(); startParticles(); }
+                else if (view === 'map') { sb.style.transform = 'translateY(0)'; refreshBar(); app.innerHTML = buildMap(); }
+                else if (view === 'intro') { currentLevelIdx = data.idx; currentExIdx = 0; app.innerHTML = buildIntro(LEVELS[currentLevelIdx]); }
+                else if (view === 'exercise') { currentLevelIdx = data.idx; currentExIdx = data.exIdx || 0; app.innerHTML = buildExercise(LEVELS[currentLevelIdx], currentExIdx); setupExercise(LEVELS[currentLevelIdx], currentExIdx); }
+                else if (view === 'complete') { currentLevelIdx = data.idx; completeLevel(LEVELS[currentLevelIdx].id); app.innerHTML = buildComplete(LEVELS[currentLevelIdx]); }
+                else if (view === 'gamecomplete') { sb.style.transform = 'translateY(-100%)'; app.innerHTML = buildGameComplete(); startParticles(); }
+                else if (view === 'pretest') { sb.style.transform = 'translateY(-100%)'; app.innerHTML = buildPreTest(); }
+                else if (view === 'posttest') { sb.style.transform = 'translateY(-100%)'; app.innerHTML = buildPostTest(); }
+            } catch (err) { app.innerHTML = '<div style="padding:40px;text-align:center;color:#ff5252"><p>Error al renderizar.</p><button onclick="resetState()" style="color:#00e676;text-decoration:underline;margin-top:12px;display:inline-block">Reiniciar</button></div>'; console.error(err); }
+            window.scrollTo(0, 0);
+        }
+
+        function toast(msg, type) { var o = document.querySelector('.feedback-toast'); if (o) o.remove(); var t = document.createElement('div'); t.className = 'feedback-toast ' + type; t.innerHTML = '<i class="fa-solid ' + (type === 'success' ? 'fa-check-circle' : 'fa-times-circle') + '" style="margin-right:8px"></i>' + msg; document.body.appendChild(t); clearTimeout(toastTimer); toastTimer = setTimeout(function () { if (t.parentNode) t.remove() }, 2500); }
+        
+        function goStart() {
+            if (GS.preTestScore === null) go('pretest');
+            else go('map');
+        }
+
+        var PLABELS = ['A1', 'B2', '=SUMA', '$C$5', 'SI()', 'F12', 'Ctrl+G', 'MAX', 'PROMEDIO', 'CONTAR', 'MIN', 'Alt+F1'];
+        var pInterval = null;
+        function startParticles() { clearInterval(pInterval); var box = document.getElementById('particles'); if (!box) return; pInterval = setInterval(function () { if (box.children.length > 14) return; var p = document.createElement('div'); p.className = 'particle'; p.textContent = PLABELS[Math.floor(Math.random() * PLABELS.length)]; p.style.left = Math.random() * 100 + '%'; p.style.top = (60 + Math.random() * 40) + '%'; p.style.setProperty('--dx', (Math.random() * 100 - 50) + 'px'); p.style.setProperty('--dy', -(200 + Math.random() * 300) + 'px'); p.style.setProperty('--rot', Math.random() * 360 + 'deg'); p.style.setProperty('--dur', (8 + Math.random() * 12) + 's'); box.appendChild(p); setTimeout(function () { if (p.parentNode) p.remove() }, 20000) }, 900); }
+
+        /* ============================================================
+           BUILD: LANDING
+           ============================================================ */
+        function buildLanding() {
+            var h = '<div class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">';
+            h += '<div id="particles" class="absolute inset-0 pointer-events-none"></div>';
+            h += '<div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20" style="background:radial-gradient(circle,rgba(0,230,118,0.3),transparent 70%)"></div>';
+            h += '<div class="relative z-10 text-center px-4 anim-slide-up">';
+            h += '<div class="mb-6"><i class="fa-solid fa-scroll text-q-accent text-4xl mb-4 block opacity-60" style="animation:float 4s ease-in-out infinite"></i></div>';
+            h += '<h1 class="font-display text-5xl sm:text-7xl font-black tracking-tight mb-2 anim-glow" style="color:#e8f0ec">EXCEL QUEST</h1>';
+            h += '<p class="font-display text-lg sm:text-xl text-q-accent tracking-[0.3em] mb-8 uppercase opacity-80">El Dominio de la Hoja de Calculo</p>';
+            h += '<p class="text-q-muted text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed">Embarcate en una aventura de 8 reinos para dominar Excel desde cero. Aprende cada habilidad antes de enfrentar los desafios.</p>';
+            h += '<button onclick="goStart()" class="btn-primary btn-gold text-base px-8 py-3 rounded-lg font-display tracking-wider"><i class="fa-solid fa-play mr-2"></i>Comenzar Aventura</button>';
+            h += '<div class="mt-16 flex justify-center gap-8 text-q-muted text-xs tracking-wider">';
+            h += '<span><i class="fa-solid fa-layer-group mr-1 text-q-accent opacity-60"></i>8 REINOS</span>';
+            h += '<span><i class="fa-solid fa-dumbbell mr-1 text-q-gold opacity-60"></i>40+ DESAFIOS</span>';
+            h += '<span><i class="fa-solid fa-bolt mr-1 text-q-accent opacity-60"></i>1600 XP</span></div></div></div>';
+            return h;
+        }
+
+        /* ============================================================
+           BUILD: MAPA
+           ============================================================ */
+        function buildMap() {
+            var progress = GS.completedLevels.length;
+            var nextId = 1;
+            if (GS.completedLevels.length > 0) nextId = Math.max.apply(null, GS.completedLevels) + 1;
+            var h = '<div class="max-w-lg mx-auto px-4 py-8">';
+            h += '<div class="text-center mb-8 anim-slide-up"><h2 class="font-display text-2xl sm:text-3xl font-bold mb-2">Mapa del Reino</h2>';
+            h += '<p class="text-q-muted text-sm">Progreso: ' + progress + '/8 reinos &middot; ' + GS.xp + ' XP</p>';
+            h += '<div class="mt-3 h-1.5 bg-q-border rounded-full max-w-xs mx-auto overflow-hidden"><div class="h-full bg-gradient-to-r from-q-accent to-q-gold rounded-full transition-all duration-700" style="width:' + (progress / 8 * 100) + '%"></div></div></div>';
+            h += '<div class="flex flex-col gap-2">';
+            for (var i = 0; i < LEVELS.length; i++) {
+                var lv = LEVELS[i], done = GS.completedLevels.indexOf(lv.id) !== -1, avail = done || lv.id === nextId, isCur = avail && !done, locked = !avail;
+                var cls = done ? 'completed' : isCur ? 'current' : 'locked';
+                var click = !locked ? ' onclick="go(\'intro\',{idx:' + i + '})" ' : '';
+                h += '<div class="level-node ' + cls + ' flex items-center gap-4 p-3 rounded-xl w-full max-w-md mx-auto" style="animation:node-reveal .5s ease-out ' + (i * 0.1) + 's both"' + click + '>';
+                h += '<div class="node-ring flex-shrink-0">';
+                if (done) h += '<i class="fa-solid fa-check text-q-accent text-lg"></i>';
+                else if (locked) h += '<i class="fa-solid fa-lock text-q-muted text-sm"></i>';
+                else h += '<i class="fa-solid ' + lv.icon + ' text-q-gold text-lg"></i>';
+                h += '</div><div class="flex-1 min-w-0"><div class="text-xs text-q-muted mb-0.5">Reino ' + lv.id + '</div>';
+                h += '<div class="font-display text-sm sm:text-base truncate">' + lv.title + '</div>';
+                h += '<div class="flex gap-2 mt-1 flex-wrap">';
+                for (var s = 0; s < Math.min(3, lv.skills.length); s++) { var st = done ? 'bg-q-accent/10 text-q-accent' : 'bg-q-border text-q-muted'; h += '<span class="text-[10px] px-1.5 py-0.5 rounded ' + st + '">' + lv.skills[s] + '</span>'; }
+                if (lv.skills.length > 3) h += '<span class="text-[10px] text-q-muted">+' + (lv.skills.length - 3) + '</span>';
+                h += '</div></div><div class="text-right flex-shrink-0"><div class="text-xs text-q-gold font-semibold">' + lv.xpReward + ' XP</div>';
+                if (done) h += '<div class="text-[10px] text-q-accent mt-1">Completado</div>';
+                else if (isCur) h += '<div class="text-[10px] text-q-gold mt-1 animate-pulse">Disponible</div>';
+                else h += '<div class="text-[10px] text-q-muted mt-1">Bloqueado</div>';
+                h += '</div></div>';
+                if (i < LEVELS.length - 1) h += '<div class="flex justify-center py-1"><svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="' + (done ? '#00e676' : '#1a2e24') + '" stroke-width="2"' + (done ? '' : ' stroke-dasharray="4 3"') + '/></svg></div>';
+            }
+            h += '</div>';
+            if (progress > 0) h += '<div class="text-center mt-8"><button onclick="resetState()" class="text-xs text-q-muted hover:text-q-danger transition underline underline-offset-2"><i class="fa-solid fa-rotate-left mr-1"></i>Reiniciar progreso</button></div>';
+            h += '</div>'; return h;
+        }
+
+        /* ============================================================
+           BUILD: INTRO CON ACORDEON EDUCATIVO
+           ============================================================ */
+        function buildIntro(lv) {
+            var idx = LEVELS.indexOf(lv), repeat = GS.completedLevels.indexOf(lv.id) !== -1;
+            var h = '<div class="max-w-2xl mx-auto px-4 py-8">';
+            h += '<button onclick="go(\'map\')" class="text-q-muted hover:text-q-accent transition text-sm mb-6 inline-block"><i class="fa-solid fa-arrow-left mr-1"></i>Volver al mapa</button>';
+
+            /* Encabezado del nivel */
+            h += '<div class="exercise-panel mb-6">';
+            h += '<div class="flex items-center gap-3 mb-4"><div class="w-14 h-14 rounded-xl bg-q-gold/10 flex items-center justify-center"><i class="fa-solid ' + lv.icon + ' text-q-gold text-2xl"></i></div>';
+            h += '<div><div class="text-xs text-q-gold tracking-wider uppercase">Reino ' + lv.id + '</div>';
+            h += '<h2 class="font-display text-xl sm:text-2xl font-bold">' + lv.title + '</h2></div></div>';
+            h += '<div class="bg-q-deep rounded-lg p-4 mb-4 border border-q-border"><p class="text-q-text/90 text-sm leading-relaxed italic">"' + lv.narrativa + '"</p></div>';
+            h += '<div class="flex items-center justify-between"><span class="text-sm text-q-gold"><i class="fa-solid fa-star mr-1"></i>' + lv.xpReward + ' XP</span><span class="text-xs text-q-muted">' + lv.exercises.length + ' desafios</span></div></div>';
+
+            /* Seccion educativa: Acordeon de habilidades */
+            h += '<div class="mb-6">';
+            h += '<div class="flex items-center gap-2 mb-4"><i class="fa-solid fa-book-open text-q-accent"></i>';
+            h += '<h3 class="font-display text-lg font-bold">Aprende antes de combatir</h3></div>';
+            h += '<p class="text-q-muted text-sm mb-4">Expande cada habilidad para estudiarla. Cuando te sientas preparado, inicia el nivel.</p>';
+
+            for (var i = 0; i < lv.skillInfo.length; i++) {
+                var si = lv.skillInfo[i];
+                var isOpen = i === 0 ? ' open' : '';
+                var unlocked = GS.skills.indexOf(si.name) !== -1;
+                h += '<div class="skill-accordion' + isOpen + '" id="acc-' + idx + '-' + i + '">';
+                h += '<div class="skill-accordion-header" onclick="toggleAcc(\'acc-' + idx + '-' + i + '\')">';
+                h += '<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ' + (unlocked ? 'bg-q-accent/10' : 'bg-q-border') + '">';
+                h += '<i class="fa-solid ' + si.icon + ' text-sm ' + (unlocked ? 'text-q-accent' : 'text-q-muted') + '"></i></div>';
+                h += '<div class="flex-1 min-w-0"><div class="text-sm font-semibold">' + si.name;
+                if (unlocked) h += ' <i class="fa-solid fa-check text-q-accent text-xs ml-1"></i>';
+                h += '</div></div>';
+                h += '<i class="fa-solid fa-chevron-down text-q-muted text-xs chevron"></i></div>';
+
+                h += '<div class="skill-accordion-body">';
+                h += '<p class="text-sm text-q-text/85 leading-relaxed mb-3">' + si.desc + '</p>';
+                if (si.example) {
+                    h += '<div class="mini-table"><table><tr><th style="width:50px">Ej.</th><th>Detalle</th></tr>';
+                    var lines = si.example.split('\n');
+                    for (var l = 0; l < lines.length; l++) {
+                        var line = lines[l];
+                        var isFormula = line.indexOf('=') === 0 || line.indexOf(' =') !== -1;
+                        h += '<tr><td class="' + (isFormula ? 'hl2' : '') + '">' + (l + 1) + '</td>';
+                        h += '<td class="' + (isFormula ? 'hl' : '') + '">' + line.replace(/</g, '&lt;') + '</td></tr>';
+                    }
+                    h += '</table></div>';
+                }
+                h += '</div></div>';
+            }
+            h += '</div>';
+
+            /* Boton de inicio */
+            h += '<button onclick="go(\'exercise\',{idx:' + idx + ',exIdx:0})" class="btn-primary btn-gold w-full py-3 font-display tracking-wider">';
+            h += '<i class="fa-solid fa-play mr-2"></i>' + (repeat ? 'Repetir Nivel' : 'Iniciar Nivel') + '</button>';
+            h += '</div>';
+            return h;
+        }
+
+        /* Toggle del acordeon */
+        function toggleAcc(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('open');
+        }
+
+        /* ============================================================
+           BUILD: EJERCICIO
+           ============================================================ */
+        function buildExercise(lv, exIdx) {
+            var ex = lv.exercises[exIdx], total = lv.exercises.length, pct = (exIdx / total) * 100;
+            var nextLabel = exIdx < total - 1 ? '<i class="fa-solid fa-arrow-right mr-2"></i>Siguiente Desafio' : '<i class="fa-solid fa-flag-checkered mr-2"></i>Completar Nivel';
+            var h = '<div class="max-w-3xl mx-auto px-4 py-6">';
+            h += '<div class="flex items-center justify-between mb-4 anim-slide-up">';
+            h += '<button onclick="go(\'map\')" class="text-q-muted hover:text-q-accent transition text-sm"><i class="fa-solid fa-xmark mr-1"></i>Salir</button>';
+            h += '<div class="text-xs text-q-muted">Desafio ' + (exIdx + 1) + ' de ' + total + ' &middot; <span class="text-q-gold">+' + ex.xp + ' XP</span></div></div>';
+            h += '<div class="h-1 bg-q-border rounded-full mb-6 overflow-hidden"><div class="h-full bg-gradient-to-r from-q-accent to-q-gold rounded-full transition-all duration-500" style="width:' + pct + '%"></div></div>';
+            h += '<div class="exercise-panel mb-6"><div class="flex items-start gap-3">';
+            h += '<div class="w-8 h-8 rounded-lg bg-q-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-q-accent font-bold text-sm">' + (exIdx + 1) + '</span></div>';
+            h += '<div><p class="text-sm sm:text-base font-semibold mb-2">' + ex.instruction + '</p>';
+            h += '<button onclick="this.nextElementSibling.classList.toggle(\'hidden\')" class="text-xs text-q-muted hover:text-q-gold transition"><i class="fa-solid fa-eye mr-1"></i>Pista</button>';
+            h += '<p class="text-xs text-q-gold/80 mt-1 hidden">' + (ex.hint || 'Lee la instruccion cuidadosamente.') + '</p></div></div></div>';
+            h += '<div id="exerciseArea" class="exercise-panel"></div>';
+            h += '<div id="validateArea" class="mt-4 hidden"><button onclick="doValidate()" class="btn-primary w-full py-3"><i class="fa-solid fa-check mr-2"></i>Validar Respuesta</button></div>';
+            h += '<div id="nextArea" class="mt-4 hidden"><button onclick="doNext()" class="btn-primary btn-gold w-full py-3">' + nextLabel + '</button></div>';
+            h += '</div>'; return h;
+        }
+
+        /* ============================================================
+           SETUP EJERCICIO
+           ============================================================ */
+        function setupExercise(lv, exIdx) {
+            var ex = lv.exercises[exIdx], area = document.getElementById('exerciseArea'), valArea = document.getElementById('validateArea');
+            document.getElementById('nextArea').classList.add('hidden');
+            if (ex.type === 'click-element') { setupClickElement(area, ex); valArea.classList.add('hidden'); }
+            else if (ex.type === 'grid-click') { setupGridClick(area, ex); valArea.classList.add('hidden'); }
+            else if (ex.type === 'grid-type') { setupGridType(area, ex); valArea.classList.remove('hidden'); }
+            else if (ex.type === 'formula-input') { setupFormulaInput(area, ex); valArea.classList.remove('hidden'); }
+            else if (ex.type === 'choice') { setupChoice(area, ex); valArea.classList.add('hidden'); }
+            else if (ex.type === 'match') { setupMatch(area, ex); valArea.classList.add('hidden'); }
+            else if (ex.type === 'error-fix') { setupErrorFix(area, ex); valArea.classList.remove('hidden'); }
+        }
+
+        function setupClickElement(area, ex) {
+            var clicked = [];
+            var h = '<div class="sheet-container"><div class="sheet-ribbon"><div class="sheet-tab active" data-id="tx">Inicio</div><div class="sheet-tab" data-id="tx2">Insertar</div><div class="sheet-tab" data-id="tx3">Diseno</div><div class="sheet-tab" data-id="tx4">Datos</div></div>';
+            h += '<div class="sheet-formula-bar"><div class="sheet-name-box" id="name-box" data-id="name-box">A1</div><span class="sheet-fx">fx</span><div class="sheet-formula-input" id="formula-bar" data-id="formula-bar">&nbsp;</div></div>';
+            h += '<div class="sheet-grid"><table><thead><tr><th class="corner"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead><tbody>';
+            for (var r = 0; r < 6; r++) { h += '<tr><th class="row-h">' + (r + 1) + '</th>'; for (var c = 0; c < 5; c++)h += '<td class="cell-ro">' + String.fromCharCode(65 + c) + (r + 1) + '</td>'; h += '</tr>'; }
+            h += '</tbody></table></div><div class="flex items-center gap-1 px-2 py-1 bg-[#2d2d2d] border-t border-[#444]"><div class="sheet-tab active">Hoja1</div><div class="sheet-tab">Hoja2</div></div></div>';
+            area.innerHTML = h;
+            for (var t = 0; t < ex.targets.length; t++) { (function (tid) { var el = area.querySelector('[data-id="' + tid + '"]'); if (el) { el.style.cursor = 'pointer'; el.style.transition = 'all 0.2s'; el.addEventListener('click', function () { if (clicked.indexOf(tid) !== -1) return; clicked.push(tid); el.style.outline = '2px solid #00e676'; el.style.outlineOffset = '1px'; el.style.background = 'rgba(0,230,118,0.1)'; if (clicked.length === ex.targets.length) { recordAttempt(true); addXP(ex.xp); toast('Correcto.', 'success'); showNext(); } }); } })(ex.targets[t]); }
+        }
+
+        function setupGridClick(area, ex) {
+            var h = '<div class="sheet-container"><div class="sheet-formula-bar"><div class="sheet-name-box" id="nb-d">-</div><span class="sheet-fx">fx</span><div class="sheet-formula-input">&nbsp;</div></div>';
+            h += '<div class="sheet-grid"><table><thead><tr><th class="corner"></th>'; for (var c = 0; c < ex.gridCols; c++)h += '<th>' + String.fromCharCode(65 + c) + '</th>';
+            h += '</tr></thead><tbody>'; for (var r = 0; r < ex.gridRows; r++) { h += '<tr><th class="row-h">' + (r + 1) + '</th>'; for (var c2 = 0; c2 < ex.gridCols; c2++) { var ref = String.fromCharCode(65 + c2) + (r + 1); h += '<td class="cell-click" data-ref="' + ref + '">' + ref + '</td>'; } h += '</tr>'; }
+            h += '</tbody></table></div></div>'; area.innerHTML = h;
+            area.querySelectorAll('.cell-click').forEach(function (cell) { cell.addEventListener('click', function () { var ref = cell.getAttribute('data-ref'); document.getElementById('nb-d').textContent = ref; if (ref === ex.target) { cell.classList.add('cell-correct'); recordAttempt(true); addXP(ex.xp); toast('Celda ' + ref + ' correcta.', 'success'); showNext(); } else { cell.classList.add('cell-wrong'); setTimeout(function () { cell.classList.remove('cell-wrong') }, 600); recordAttempt(false); toast('Incorrecto.', 'error'); } }); });
+        }
+
+        function setupGridType(area, ex) {
+            var keys = Object.keys(ex.grid), mc = 4, mr = 4;
+            for (var k = 0; k < keys.length; k++) { var col = keys[k].charCodeAt(0) - 65, row = parseInt(keys[k].slice(1)); if (col + 1 > mc) mc = col + 1; if (row + 1 > mr) mr = row + 1; }
+            var h = '<div class="sheet-container"><div class="sheet-grid"><table><thead><tr><th class="corner"></th>'; for (var c = 0; c < mc; c++)h += '<th>' + String.fromCharCode(65 + c) + '</th>';
+            h += '</tr></thead><tbody>'; for (var r = 1; r <= mr; r++) { h += '<tr><th class="row-h">' + r + '</th>'; for (var c2 = 0; c2 < mc; c2++) { var ref = String.fromCharCode(65 + c2) + r, cd = ex.grid[ref]; if (cd) h += '<td class="cell-edit cell-pending" data-ref="' + ref + '"><input class="cell-input" placeholder="' + cd.label + '" data-ref="' + ref + '" data-expected="' + cd.expected + '"></td>'; else h += '<td class="cell-ro"></td>'; } h += '</tr>'; }
+            h += '</tbody></table></div></div>'; area.innerHTML = h;
+        }
+
+        function setupFormulaInput(area, ex) {
+            var ctx = ex.context || {}, refs = Object.keys(ctx), mc = 6, mr = 4;
+            for (var k = 0; k < refs.length; k++) { var col = refs[k].charCodeAt(0) - 65, row = parseInt(refs[k].slice(1)); if (col + 1 > mc) mc = col + 1; if (row + 1 > mr) mr = row + 1; }
+            var h = '<div class="sheet-container"><div class="sheet-formula-bar"><div class="sheet-name-box" id="nb-f">' + ex.answerCell + '</div><span class="sheet-fx">fx</span><div class="sheet-formula-input" id="f-disp">&nbsp;</div></div>';
+            h += '<div class="sheet-grid"><table><thead><tr><th class="corner"></th>'; for (var c = 0; c < mc; c++)h += '<th>' + String.fromCharCode(65 + c) + '</th>';
+            h += '</tr></thead><tbody>'; for (var r = 1; r <= mr; r++) {
+                h += '<tr><th class="row-h">' + r + '</th>'; for (var c2 = 0; c2 < mc; c2++) {
+                    var ref = String.fromCharCode(65 + c2) + r;
+                    if (ctx[ref] !== undefined) {
+                        if (ref === ex.answerCell) h += '<td class="cell-edit cell-pending" data-ref="' + ref + '" style="border:2px solid #ffab00"><input class="cell-input" placeholder="=" data-ref="' + ref + '"></td>';
+                        else { var val = ctx[ref], isTxt = typeof val === 'string' && val !== '' && isNaN(val); h += '<td class="cell-ro' + (isTxt ? ' font-semibold' : '') + '" style="' + (isTxt ? 'color:#333;background:#e8f0ec' : '') + '">' + val + '</td>'; }
+                    }
+                    else h += '<td class="cell-ro"></td>';
+                } h += '</tr>';
+            }
+            h += '</tbody></table></div></div>';
+            if (ex.multiStep) h += '<div class="mt-3 text-xs text-q-muted">Luego se pediran: ' + ex.multiStep.map(function (s) { return s.cell; }).join(', ') + '</div>';
+            h += '<div id="multiStepArea"></div>'; area.innerHTML = h;
+            var inp = area.querySelector('input[data-ref="' + ex.answerCell + '"]'), fd = document.getElementById('f-disp');
+            if (inp && fd) inp.addEventListener('input', function () { fd.textContent = inp.value || '\u00A0'; });
+        }
+
+        function setupChoice(area, ex) {
+            var letters = ['A', 'B', 'C', 'D', 'E', 'F'], h = '<div class="flex flex-col gap-3">';
+            for (var i = 0; i < ex.options.length; i++)h += '<button class="option-btn" data-idx="' + i + '" onclick="handleChoice(this,' + i + ',' + ex.correct + ')"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full border border-q-border text-xs text-q-muted mr-3 flex-shrink-0">' + letters[i] + '</span>' + ex.options[i] + '</button>';
+            h += '</div><div id="explanationBox" class="hidden mt-4 p-4 bg-q-deep rounded-lg border border-q-border text-sm text-q-text/80 leading-relaxed"></div>';
+            area.innerHTML = h; window._choiceExp = ex.explanation; window._choiceXP = ex.xp;
+        }
+        function handleChoice(btn, idx, correct) {
+            if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+            var all = btn.parentElement.querySelectorAll('.option-btn'); for (var i = 0; i < all.length; i++)all[i].style.pointerEvents = 'none';
+            if (idx === correct) { btn.classList.add('correct'); recordAttempt(true); addXP(window._choiceXP); toast('Correcto.', 'success'); }
+            else { btn.classList.add('wrong'); all[correct].classList.add('correct'); recordAttempt(false); toast('Incorrecto.', 'error'); }
+            var box = document.getElementById('explanationBox'); if (window._choiceExp) { box.innerHTML = '<i class="fa-solid fa-lightbulb text-q-gold mr-2"></i>' + window._choiceExp; box.classList.remove('hidden'); }
+            showNext();
+        }
+
+        function setupMatch(area, ex) {
+            var shuffled = ex.pairs.slice().sort(function () { return Math.random() - 0.5; });
+            var h = '<p class="text-xs text-q-muted mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i>Selecciona izquierda, luego su par derecho.</p>';
+            h += '<div class="grid grid-cols-2 gap-4"><div class="flex flex-col gap-2" id="matchLeft">';
+            for (var i = 0; i < ex.pairs.length; i++)h += '<div class="match-item" data-side="left" data-idx="' + i + '">' + ex.pairs[i].left + '</div>';
+            h += '</div><div class="flex flex-col gap-2" id="matchRight">';
+            for (var j = 0; j < shuffled.length; j++)h += '<div class="match-item" data-side="right" data-idx="' + ex.pairs.indexOf(shuffled[j]) + '">' + shuffled[j].right + '</div>';
+            h += '</div></div>'; area.innerHTML = h;
+            var selLeft = null, matched = 0, total = ex.pairs.length;
+            area.querySelectorAll('.match-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    if (item.classList.contains('matched')) return; var side = item.getAttribute('data-side'), idx = parseInt(item.getAttribute('data-idx'));
+                    if (side === 'left') { var lefts = area.querySelectorAll('#matchLeft .match-item'); for (var x = 0; x < lefts.length; x++)lefts[x].classList.remove('active'); item.classList.add('active'); selLeft = idx; }
+                    else if (side === 'right' && selLeft !== null) {
+                        if (idx === selLeft) { item.classList.add('matched'); var tgt = area.querySelector('#matchLeft [data-idx="' + selLeft + '"]'); if (tgt) { tgt.classList.remove('active'); tgt.classList.add('matched'); } matched++; if (matched === total) { recordAttempt(true); addXP(ex.xp); toast('Todos correctos.', 'success'); showNext(); } }
+                        else { item.classList.add('wrong-match'); setTimeout(function () { item.classList.remove('wrong-match') }, 500); recordAttempt(false); } selLeft = null;
+                    }
+                });
+            });
+        }
+
+        function setupErrorFix(area, ex) {
+            var ctx = ex.context || {}, allRefs = Object.keys(ctx).concat(ex.errors.map(function (e) { return e.cell; })), mc = 3, mr = 4;
+            for (var k = 0; k < allRefs.length; k++) { var col = allRefs[k].charCodeAt(0) - 65, row = parseInt(allRefs[k].slice(1)); if (col + 1 > mc) mc = col + 1; if (row + 1 > mr) mr = row + 1; }
+            var h = '<div class="sheet-container"><div class="sheet-grid"><table><thead><tr><th class="corner"></th>'; for (var c = 0; c < mc; c++)h += '<th>' + String.fromCharCode(65 + c) + '</th>';
+            h += '</tr></thead><tbody>'; for (var r = 1; r <= mr; r++) {
+                h += '<tr><th class="row-h">' + r + '</th>'; for (var c2 = 0; c2 < mc; c2++) {
+                    var ref = String.fromCharCode(65 + c2) + r, errObj = null;
+                    for (var e = 0; e < ex.errors.length; e++) { if (ex.errors[e].cell === ref) { errObj = ex.errors[e]; break; } }
+                    if (errObj) h += '<td class="cell-ro" style="background:#ffcdd2;color:#c62828;font-weight:600;cursor:pointer" data-ref="' + ref + '" title="' + errObj.cause + '">' + errObj.errorType + '</td>';
+                    else if (ctx[ref] !== undefined) h += '<td class="cell-ro">' + ctx[ref] + '</td>';
+                    else h += '<td class="cell-ro"></td>';
+                } h += '</tr>';
+            }
+            h += '</tbody></table></div></div><div class="mt-4 space-y-3">';
+            for (var ei = 0; ei < ex.errors.length; ei++) {
+                var er = ex.errors[ei];
+                h += '<div class="bg-q-deep rounded-lg p-3 border border-q-border err-block" data-err-idx="' + ei + '">';
+                h += '<div class="flex items-center gap-2 mb-2"><span class="text-xs px-2 py-0.5 rounded bg-q-danger/20 text-q-danger font-mono">' + er.cell + ': ' + er.errorType + '</span><span class="text-xs text-q-muted">' + er.cause + '</span></div>';
+                h += '<div class="flex gap-2 items-center"><span class="text-xs text-q-muted">Correccion:</span>';
+                h += '<input class="flex-1 bg-q-bg border border-q-border rounded px-3 py-1.5 text-sm font-mono text-q-text focus:border-q-accent focus:outline-none" placeholder="Escribe la formula..." id="errIn' + ei + '" data-correct="' + er.correctFormula.toLowerCase() + '"></div></div>';
+            }
+            h += '</div>'; area.innerHTML = h;
+            for (var hi = 0; hi < ex.errors.length; hi++) {
+                (function (idx) {
+                    var blk = area.querySelector('.err-block[data-err-idx="' + idx + '"]'), ref = ex.errors[idx].cell, cell = area.querySelector('[data-ref="' + ref + '"]');
+                    if (blk && cell) { blk.addEventListener('mouseenter', function () { cell.style.outline = '2px solid #ff5252'; }); blk.addEventListener('mouseleave', function () { cell.style.outline = 'none'; }); }
+                })(hi);
+            }
+        }
+
+        /* ============================================================
+           VALIDACION
+           ============================================================ */
+        var multiQueue = [];
+        function doValidate() {
+            var lv = LEVELS[currentLevelIdx], ex = lv.exercises[currentExIdx], ok = true;
+            if (ex.type === 'grid-type') { document.querySelectorAll('#exerciseArea .cell-input').forEach(function (inp) { var exp = inp.getAttribute('data-expected').toLowerCase(), val = inp.value.trim().toLowerCase(), cell = inp.parentElement; cell.classList.remove('cell-pending'); if (val === exp) cell.classList.add('cell-correct'); else { cell.classList.add('cell-wrong'); ok = false; } }); }
+            else if (ex.type === 'formula-input') {
+                var inp = document.querySelector('#exerciseArea input[data-ref="' + ex.answerCell + '"]'), val = inp.value.trim().toLowerCase().replace(/\s/g, ''), correct = false; for (var a = 0; a < ex.acceptedAnswers.length; a++) { if (val === ex.acceptedAnswers[a].replace(/\s/g, '')) { correct = true; break; } } var cell = inp.parentElement;
+                if (correct) { cell.classList.remove('cell-pending'); cell.classList.add('cell-correct'); inp.value = ex.displayResult; inp.readOnly = true; if (ex.bonusXP) addXP(ex.bonusXP); if (ex.multiStep && ex.multiStep.length > 0) { multiQueue = ex.multiStep.slice(); doMultiStep(ex); return; } }
+                else { cell.classList.add('cell-wrong'); ok = false; }
+            }
+            else if (ex.type === 'error-fix') {
+                for (var ei = 0; ei < ex.errors.length; ei++) {
+                    var einp = document.getElementById('errIn' + ei), val2 = einp.value.trim().toLowerCase().replace(/\s/g, ''), exp2 = einp.getAttribute('data-correct'), blk = einp.closest('.err-block');
+                    if (val2 === exp2) { einp.style.borderColor = '#00e676'; einp.style.color = '#00e676'; einp.readOnly = true; } else { einp.style.borderColor = '#ff5252'; einp.style.color = '#ff5252'; blk.classList.add('anim-shake'); setTimeout(function () { blk.classList.remove('anim-shake') }, 500); ok = false; }
+                }
+            }
+            if (ok) { recordAttempt(true); addXP(ex.xp); toast('Correcto.', 'success'); showNext(); }
+            else { recordAttempt(false); toast('Incorrecto. Revisa e intenta de nuevo.', 'error'); setTimeout(function () { document.querySelectorAll('.cell-wrong').forEach(function (c) { c.classList.remove('cell-wrong'); }); }, 600); }
+        }
+        function doMultiStep(ex) {
+            if (multiQueue.length === 0) { showNext(); return; } var step = multiQueue.shift(), box = document.getElementById('multiStepArea');
+            box.innerHTML = '<div class="mt-4 p-4 bg-q-deep rounded-lg border border-q-gold/30 anim-slide-up"><p class="text-sm mb-3"><i class="fa-solid fa-arrow-right text-q-gold mr-2"></i>Escribe en <strong>' + step.cell + '</strong> la formula.</p><div class="flex gap-2"><input id="msInp" class="flex-1 bg-q-bg border border-q-border rounded px-3 py-2 text-sm font-mono text-q-text focus:border-q-accent focus:outline-none" placeholder="="><button onclick="doMSVal()" class="btn-primary px-4 py-2 text-sm">Validar</button></div></div>';
+            document.getElementById('msInp').focus(); window._msStep = step;
+        }
+        function doMSVal() {
+            var step = window._msStep, inp = document.getElementById('msInp'), val = inp.value.trim().toLowerCase().replace(/\s/g, ''), ok = false; for (var a = 0; a < step.answers.length; a++) { if (val === step.answers[a].replace(/\s/g, '')) { ok = true; break; } }
+            if (ok) { inp.style.borderColor = '#00e676'; inp.style.color = '#00e676'; inp.readOnly = true; inp.value = String(step.result); var cell = document.querySelector('#exerciseArea td[data-ref="' + step.cell + '"]'); if (cell) { cell.classList.remove('cell-pending'); cell.classList.add('cell-correct'); cell.textContent = step.result; } setTimeout(function () { doMultiStep(LEVELS[currentLevelIdx].exercises[currentExIdx]); }, 600); }
+            else { inp.style.borderColor = '#ff5252'; recordAttempt(false); toast('Incorrecto.', 'error'); setTimeout(function () { inp.style.borderColor = ''; }, 1000); }
+        }
+
+        function showNext() { var n = document.getElementById('nextArea'), v = document.getElementById('validateArea'); if (v) v.classList.add('hidden'); if (n) { n.classList.remove('hidden'); n.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
+        function doNext() {
+            var lv = LEVELS[currentLevelIdx]; if (currentExIdx < lv.exercises.length - 1) go('exercise', { idx: currentLevelIdx, exIdx: currentExIdx + 1 });
+            else { for (var s = 0; s < lv.skills.length; s++)addSkill(lv.skills[s]); addXP(lv.xpReward); if (GS.completedLevels.length >= 8) go('gamecomplete'); else go('complete', { idx: currentLevelIdx }); }
+        }
+
+        /* ============================================================
+           BUILD: COMPLETADO Y FINAL
+           ============================================================ */
+        function buildComplete(lv) {
+            var acc = GS.levelAttempts > 0 ? Math.round((GS.levelCorrect / GS.levelAttempts) * 100) : 0;
+            var h = '<div class="max-w-lg mx-auto px-4 py-12 text-center anim-slide-up">';
+            h += '<div class="w-20 h-20 rounded-full bg-q-accent/10 border-2 border-q-accent flex items-center justify-center mx-auto mb-6 anim-celebrate"><i class="fa-solid fa-trophy text-q-accent text-3xl"></i></div>';
+            h += '<h2 class="font-display text-3xl font-bold mb-2">Reino Conquistado</h2><p class="text-q-muted mb-8">' + lv.title + '</p>';
+            h += '<div class="grid grid-cols-3 gap-4 mb-8">';
+            h += '<div class="bg-q-card border border-q-border rounded-xl p-4"><div class="text-2xl font-bold text-q-gold">' + lv.xpReward + '</div><div class="text-xs text-q-muted mt-1">XP</div></div>';
+            h += '<div class="bg-q-card border border-q-border rounded-xl p-4"><div class="text-2xl font-bold text-q-accent">' + lv.skills.length + '</div><div class="text-xs text-q-muted mt-1">Habilidades</div></div>';
+            h += '<div class="bg-q-card border border-q-border rounded-xl p-4"><div class="text-2xl font-bold text-q-text">' + acc + '%</div><div class="text-xs text-q-muted mt-1">Precision</div></div></div>';
+            h += '<div class="mb-8"><h3 class="text-xs text-q-muted tracking-wider uppercase mb-3">Habilidades Desbloqueadas</h3><div class="flex flex-wrap justify-center gap-2">';
+            for (var i = 0; i < lv.skills.length; i++)h += '<span class="text-xs px-3 py-1.5 rounded-lg border border-q-accent bg-q-accent/10 text-q-accent"><i class="fa-solid fa-check mr-1"></i>' + lv.skills[i] + '</span>';
+            h += '</div></div><div class="flex flex-col gap-3">';
+            h += '<button onclick="go(\'map\')" class="btn-primary btn-gold py-3 font-display tracking-wider"><i class="fa-solid fa-map mr-2"></i>Ver Mapa</button>';
+            if (currentLevelIdx < LEVELS.length - 1) h += '<button onclick="go(\'intro\',{idx:' + (currentLevelIdx + 1) + '})" class="btn-primary py-3"><i class="fa-solid fa-arrow-right mr-2"></i>Siguiente Reino</button>';
+            h += '</div></div>'; return h;
+        }
+
+        function buildGameComplete() {
+            var acc = GS.totalAttempts > 0 ? Math.round((GS.correctAttempts / GS.totalAttempts) * 100) : 0;
+            var h = '<div class="min-h-screen flex items-center justify-center relative overflow-hidden">';
+            h += '<div class="absolute inset-0" style="background:radial-gradient(ellipse at center,rgba(255,171,0,0.08),transparent 70%)"></div>';
+            h += '<div id="particles" class="absolute inset-0 pointer-events-none"></div>';
+            h += '<div class="relative z-10 text-center px-4 anim-slide-up max-w-lg">';
+            h += '<div class="w-24 h-24 rounded-full bg-q-gold/10 border-2 border-q-gold flex items-center justify-center mx-auto mb-6" style="animation:pulse-glow 2s infinite"><i class="fa-solid fa-crown text-q-gold text-4xl"></i></div>';
+            h += '<h1 class="font-display text-4xl sm:text-5xl font-black mb-2" style="color:#ffab00">Maestro Excel</h1><p class="text-q-muted text-lg mb-8">Has conquistado todos los reinos.</p>';
+            h += '<div class="grid grid-cols-2 gap-4 mb-8">';
+            h += '<div class="bg-q-card border border-q-border rounded-xl p-5"><div class="text-3xl font-bold text-q-gold">' + GS.xp + '</div><div class="text-xs text-q-muted mt-1">XP Total</div></div>';
+            h += '<div class="bg-q-card border border-q-border rounded-xl p-5"><div class="text-3xl font-bold text-q-accent">' + GS.skills.length + '</div><div class="text-xs text-q-muted mt-1">Habilidades</div></div>';
+            h += '<div class="bg-q-card border border-q-border rounded-xl p-5"><div class="text-3xl font-bold text-q-text">' + acc + '%</div><div class="text-xs text-q-muted mt-1">Precision</div></div>';
+            h += '<div class="bg-q-card border border-q-border rounded-xl p-5"><div class="text-3xl font-bold text-q-text">8/8</div><div class="text-xs text-q-muted mt-1">Reinos</div></div></div>';
+            h += '<div class="mb-8"><h3 class="text-xs text-q-muted tracking-wider uppercase mb-3">Todas tus Habilidades</h3><div class="flex flex-wrap justify-center gap-1.5">';
+            for (var i = 0; i < GS.skills.length; i++)h += '<span class="text-[11px] px-2 py-1 rounded bg-q-accent/10 text-q-accent border border-q-accent/20">' + GS.skills[i] + '</span>';
+            h += '</div></div>';
+            if (GS.postTestScore === null) {
+                h += '<button onclick="go(\'posttest\')" class="btn-primary btn-gold px-8 py-3 font-display tracking-wider"><i class="fa-solid fa-clipboard-check mr-2"></i>Realizar Post-Test</button>';
+            } else {
+                h += '<div class="bg-q-card border border-q-border rounded-xl p-5 mb-8 w-full"><div class="text-xs text-q-muted mb-2">Evaluación Final</div><div class="flex justify-around"><div class="text-center"><div class="text-xl text-q-danger">' + GS.preTestScore + '%</div><div class="text-xs">Pre-Test</div></div><div class="text-center"><div class="text-xl text-q-accent">' + GS.postTestScore + '%</div><div class="text-xs">Post-Test</div></div></div></div>';
+                h += '<button onclick="go(\'map\')" class="btn-primary btn-gold px-8 py-3 font-display tracking-wider"><i class="fa-solid fa-rotate mr-2"></i>Revisar Mapa</button>';
+            }
+            h += '<div class="mt-4"><button onclick="resetState()" class="text-xs text-q-muted hover:text-q-danger transition underline underline-offset-2">Reiniciar aventura</button></div></div></div>'; return h;
+        }
+
+        /* ============================================================
+           TESTS
+           ============================================================ */
+        var testQuestions = [
+            { q: '¿Qué atajo se usa para guardar en la mayoría de versiones?', opts: ['Ctrl+S', 'Ctrl+P', 'Alt+G', 'Shift+S'], correct: 0 },
+            { q: '¿Qué operador se usa para fijar una celda (referencia absoluta)?', opts: ['#', '&', '$', '%'], correct: 2 },
+            { q: '¿Cuál es la función correcta para sumar de A1 a A5?', opts: ['=A1:A5', '=SUMA(A1,A5)', '=SUMA(A1:A5)', 'SUMA A1-A5'], correct: 2 },
+            { q: '¿Para qué sirve el formato condicional?', opts: ['Dar formato al texto', 'Cambiar colores según el valor', 'Borrar celdas vacías', 'Crear gráficos'], correct: 1 },
+            { q: '¿Qué tipo de gráfico muestra mejor una tendencia en el tiempo?', opts: ['Circular', 'Columnas', 'Líneas', 'Dispersión'], correct: 2 }
+        ];
+
+        function buildPreTest() {
+            return buildTestUI('Pre-Test: Evaluación Inicial', 'Descubre tu nivel antes de comenzar', 'pretest');
+        }
+
+        function buildPostTest() {
+            return buildTestUI('Post-Test: Evaluación Final', 'Demuestra lo que has aprendido', 'posttest');
+        }
+
+        function buildTestUI(title, subtitle, type) {
+            var h = '<div class="max-w-2xl mx-auto px-4 py-12 anim-slide-up" id="testContainer">';
+            h += '<div class="text-center mb-8"><h2 class="font-display text-3xl font-bold mb-2 text-q-accent">' + title + '</h2>';
+            h += '<p class="text-q-muted">' + subtitle + '</p></div>';
+            h += '<div id="questionsArea" class="space-y-6">';
+            for(var i=0; i<testQuestions.length; i++) {
+                h += '<div class="exercise-panel p-6"><p class="font-semibold mb-4">' + (i+1) + '. ' + testQuestions[i].q + '</p><div class="flex flex-col gap-2">';
+                for(var j=0; j<testQuestions[i].opts.length; j++) {
+                    h += '<label class="flex items-center gap-3 p-3 border border-q-border rounded-lg cursor-pointer hover:bg-q-border/30 transition"><input type="radio" name="q'+i+'" value="'+j+'" class="accent-q-accent"><span>' + testQuestions[i].opts[j] + '</span></label>';
+                }
+                h += '</div></div>';
+            }
+            h += '</div>';
+            h += '<div class="mt-8 text-center"><button onclick="submitTest(\'' + type + '\')" class="btn-primary py-3 px-8 text-lg"><i class="fa-solid fa-check mr-2"></i>Enviar Respuestas</button></div>';
+            h += '</div>';
+            return h;
+        }
+
+        function submitTest(type) {
+            var score = 0;
+            var answeredAll = true;
+            for(var i=0; i<testQuestions.length; i++) {
+                var selected = document.querySelector('input[name="q'+i+'"]:checked');
+                if(!selected) { answeredAll = false; break; }
+                if(parseInt(selected.value) === testQuestions[i].correct) score += 20;
+            }
+            if(!answeredAll) { toast('Por favor, responde todas las preguntas.', 'error'); return; }
+            if(type === 'pretest') {
+                GS.preTestScore = score;
+                saveState();
+                var c = document.getElementById('testContainer');
+                c.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-clipboard-check text-4xl text-q-accent mb-4"></i><h2 class="text-2xl font-bold mb-2">Pre-Test Completado</h2><p class="text-q-muted mb-8">Puntaje inicial: ' + score + '%</p><button onclick="go(\'map\')" class="btn-primary py-3 px-8">Comenzar Aventura</button></div>';
+            } else {
+                GS.postTestScore = score;
+                saveState();
+                go('gamecomplete');
+            }
+        }
+
+        /* ============================================================
+           INICIO
+           ============================================================ */
+        loadState();
+        go(GS.level >= 1 && GS.level <= 8 ? 'map' : 'landing');
+    </script>
+</body>
+
+</html>
